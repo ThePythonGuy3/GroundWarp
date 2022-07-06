@@ -81,7 +81,7 @@ def mainGame(display):
 
 		for i in range(20):
 			for j in range(20):
-				display.blit(sprite("blockC"), (i * 32, j * 32))
+				display.blit(organicSpike.animate(tick), (i * 32, j * 32))
 
 		pg.display.update()
 
@@ -92,7 +92,7 @@ def mainGame(display):
 pg.init()
 display = pg.display.set_mode((640, 640))
 
-organicSpike = animator(loadArray("block2", 2), 3)
+organicSpike = animator(loadArray("spoikeB", 6), 3)
 mainGame(display)
 
 pg.quit()
