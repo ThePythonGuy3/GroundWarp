@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Editor</title>
+
+		<link rel="stylesheet" href="main.css">
+		<script src="main.js"></script>
+	</head>
+	<body>
+		<div style="display: flex; flex-direction: row;">
+			<div style="display: flex; flex-direction: row;">
+				<input id="v0" type="image" src="sprites/no.png" width=32, height=32>
+				<input id="v1" type="image" src="sprites/block.png" width=32, height=32>
+				<input id="v2" type="image" src="sprites/block1.png" width=32, height=32>
+				<input id="v3" type="image" src="sprites/block2.png" width=32, height=32>
+				<input id="v4" type="image" src="sprites/spoike.png" width=32, height=32>
+			</div>
+			<div style="display: flex; flex-direction: row;">
+				<select id="select" style="height: 40px;">
+					<option>A</option>
+					<option>B</option>
+					<option>C</option>
+				</select>
+			</div>
+			<p style="margin-left: 30px;">ID:</p>
+			<p id="pp">1</p>
+		</div>
+		<canvas id="map" width=509 height=339></canvas>
+	</body>
+</html>

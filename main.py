@@ -42,7 +42,8 @@ blocks = [
 	block(anim.animator(anim.split("spoikeB", 6))), #8
 	block(anim.animator(anim.sprite("blockC"))),    #9
 	block(anim.animator(anim.sprite("blockC1"))),   #10
-	block(anim.animator(anim.sprite("spoikeC")))    #11
+	block(anim.animator(anim.sprite("blockC2"))),   #11
+	block(anim.animator(anim.sprite("spoikeC")))    #12
 ]
 
 def mainGame(display):

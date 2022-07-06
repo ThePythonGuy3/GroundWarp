@@ -1,0 +1,12 @@
+* {
+	-ms-interpolation-mode: nearest-neighbor;
+	image-rendering: crisp-edges;
+	image-rendering: pixelated;
+}
+
+input[type="image"] {
+	margin: 1px;
+	padding: 2px;
+
+	border: 1px solid black;
+}
