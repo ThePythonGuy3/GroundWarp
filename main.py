@@ -40,7 +40,7 @@ blocks = [
 	block(anim.animator(anim.sprite("spoike")), True, True),    #4
 	block(anim.animator(anim.sprite("blockB"))),                #5 ---- B
 	block(anim.animator(anim.sprite("blockB1"))),               #6
-	block(anim.animator(anim.split("blockB2", 9), 1, True)),             #7
+	block(anim.animator(anim.split("blockB2", 9), 1, True)),    #7
 	block(anim.animator(anim.split("spoikeB", 6)), True, True), #8
 	block(anim.animator(anim.sprite("blockC"))),                #9 ---- C
 	block(anim.animator(anim.sprite("blockC1"))),               #10
@@ -85,7 +85,7 @@ def loadRoom(name):
 			else:
 				v = int(i)
 				if v != 0:
-					tiles[r][(x, y)] = blocks[v - 1].create(colliderList, r, x, y, 0)
+					tiles[r][(x, y)] = blocks[v - 1 + r * 4].create(colliderList, r, x, y, 0)
 			x += 1
 
 	for r in range(3):
@@ -127,15 +127,11 @@ def mainGame(display):
 		deltaTime = (gameTime * 60 - preGameTime * 60)
 
 		display.fill((255, 255, 255))
+		mainSurf.fill((0, 0, 0, 0))
 
 		for i in tiles[0].keys():
 			mainSurf.blit(tiles[0][i].animator.animate(tick), (i[0] * 32, i[1] * 32))
-			mainSurf.blit(bitmask[bitm[0][i]], (i[0] * 32, i[1] * 32))
-
-		for i in range(960):
-			for j in range(640):
-				if mainSurf.get_at((i, j)) == (0, 0, 0, 255):
-					mainSurf.set_at((i, j), (0, 0, 0, 0))
+			mainSurf.blit(bitmask[bitm[0][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
 
 		display.blit(mainSurf, (0, 0))
 		pg.display.update()
@@ -143,6 +139,7 @@ def mainGame(display):
 		tickF += deltaTime
 		tick = int(tickF)
 		preGameTime = gameTime
+		print(deltaTime)
 
 loadRoom("room1")
 mainGame(display)
