@@ -8,7 +8,7 @@ class animator:
 		self.pingpong = pingpong
 
 	def animate(self, tick):
-		if len(self.sprites) == 1: return self.sprites[0]
+		if type(self.sprites) != list: return self.sprites
 		tickP = int((tick / 60) * self.speed * pi) % len(self.sprites)
 		if self.pingpong: tickP = int(round(abs(sin(tick / 60 * (self.speed))) * (len(self.sprites) - 1)))
 		return self.sprites[tickP]

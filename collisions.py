@@ -2,7 +2,7 @@ pg = None
 
 class collider:
 	def __init__(self, x, y, kill):
-		self.rect = Rect(x * 16, y * 16, 16, 16)
+		self.rect = pg.Rect(x * 16, y * 16, 16, 16)
 		self.kill = kill
 
 def rectCollide(colliderList, rect):
