@@ -41,7 +41,7 @@ blocks = [
 	block(anim.animator(anim.sprite("blockB"))),                #5 ---- B
 	block(anim.animator(anim.sprite("blockB1"))),               #6
 	block(anim.animator(anim.split("blockB2", 9), 1, True)),    #7
-	block(anim.animator(anim.split("spoikeB", 6)), True, True), #8
+	block(anim.animator(anim.split("spoikeB", 6), 2), True, True), #8
 	block(anim.animator(anim.sprite("blockC"))),                #9 ---- C
 	block(anim.animator(anim.sprite("blockC1"))),               #10
 	block(anim.animator(anim.sprite("blockC2"))),               #11
@@ -118,10 +118,17 @@ def mainGame(display):
 
 	mainSurf = pg.Surface((960, 640), pg.SRCALPHA, 32)
 
+	dimension = 1
+
 	while running:
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
+			if e.type == pg.KEYDOWN:
+				if e.key == pg.K_RIGHT: dimension += 1
+				if e.key == pg.K_LEFT: dimension -= 1
+
+				dimension %= 3
 
 		gameTime = time() - gameTimeStart
 		deltaTime = (gameTime * 60 - preGameTime * 60)
@@ -129,9 +136,9 @@ def mainGame(display):
 		display.fill((255, 255, 255))
 		mainSurf.fill((0, 0, 0, 0))
 
-		for i in tiles[0].keys():
-			mainSurf.blit(tiles[0][i].animator.animate(tick), (i[0] * 32, i[1] * 32))
-			mainSurf.blit(bitmask[bitm[0][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
+		for i in tiles[dimension].keys():
+			mainSurf.blit(tiles[dimension][i].animator.animate(tick), (i[0] * 32, i[1] * 32))
+			mainSurf.blit(bitmask[bitm[dimension][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
 
 		display.blit(mainSurf, (0, 0))
 		pg.display.update()
