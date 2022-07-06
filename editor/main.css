@@ -10,3 +10,7 @@ input[type="image"] {
 
 	border: 1px solid black;
 }
+
+canvas {
+	cursor: pointer;
+}

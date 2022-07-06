@@ -7,8 +7,11 @@
 
 		<link rel="stylesheet" href="main.css">
 		<script src="main.js"></script>
+		<script src="FileSaver.js"></script>
 	</head>
 	<body>
+		<input type="file" id="chooseFile" style="display: none;" accept=".room">
+
 		<div style="display: flex; flex-direction: row;">
 			<div style="display: flex; flex-direction: row;">
 				<input id="v0" type="image" src="sprites/no.png" width=32, height=32>
@@ -16,6 +19,11 @@
 				<input id="v2" type="image" src="sprites/block1.png" width=32, height=32>
 				<input id="v3" type="image" src="sprites/block2.png" width=32, height=32>
 				<input id="v4" type="image" src="sprites/spoike.png" width=32, height=32>
+				<input id="v99" type="image" src="sprites/begin.png" width=32, height=32>
+				<input id="rng" type="image" src="sprites/random.png" width=32, height=32>
+				<input id="new" type="image" src="sprites/new.png" width=32, height=32>
+				<input id="save" type="image" src="sprites/save.png" width=32, height=32>
+				<input id="load" type="image" src="sprites/load.png" width=32, height=32>
 			</div>
 			<div style="display: flex; flex-direction: row;">
 				<select id="select" style="height: 40px;">
