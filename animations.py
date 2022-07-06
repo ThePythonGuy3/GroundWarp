@@ -1,7 +1,8 @@
 from math import *
+pg = None
 
 class animator:
-	def __init__(self, sprites, speed, pingpong = False):
+	def __init__(self, sprites, speed = 1, pingpong = False):
 		self.sprites = sprites
 		self.speed = speed
 		self.pingpong = pingpong
@@ -12,7 +13,7 @@ class animator:
 		if self.pingpong: tickP = int(round(abs(sin(tick / 60 * (self.speed))) * (len(self.sprites) - 1)))
 		return self.sprites[tickP]
 
-def split(pg, name, n):
+def split(name, n):
 	img = pg.image.load("sprites/" + name + ".png")
 	output = []
 	for i in range(n):
@@ -21,3 +22,8 @@ def split(pg, name, n):
 		img2 = pg.transform.scale(surf, (32, 32))
 		output.append(img2)
 	return output
+
+def sprite(name):
+	img = pg.image.load("sprites/" + name + ".png").convert_alpha()
+	img = pg.transform.scale(img, (32, 32))
+	return img
