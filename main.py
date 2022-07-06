@@ -2,6 +2,8 @@ import pygame as pg
 from math import *
 from time import *
 
+from animations import *
+
 size = 30 # Tilespace 0-29   Colliderspace 0-59
 colliderList = [[], [], []] # Dimensions A, B, C
 
@@ -12,18 +14,6 @@ class collider:
 		self.width = width
 		self.height = height
 		self.kill = kill
-
-class animator:
-	def __init__(self, sprites, speed, pingpong = False):
-		self.sprites = sprites
-		self.speed = speed
-		self.pingpong = pingpong
-
-	def animate(self, tick):
-		if len(self.sprites) == 1: return self.sprites[0]
-		tickP = int((tick / 60) * self.speed * pi) % len(self.sprites)
-		if self.pingpong: tickP = int(round(abs(sin(tick / 60 * (self.speed))) * (len(self.sprites) - 1)))
-		return self.sprites[tickP]
 
 class block:
 	def __init__(self, key, animators, kill, half = False):
@@ -43,15 +33,6 @@ class block:
 				if rotation == 1: colliderList[dimension].append(collider(tilex * 2, tiley * 2 + i, self.kill))
 				if rotation == 2: colliderList[dimension].append(collider(tilex * 2 + i, tiley * 2, self.kill))
 				if rotation == 3: colliderList[dimension].append(collider(tilex * 2 + 1, tiley * 2 + i, self.kill))
-
-def loadArray(name, n):
-	output = []
-	for i in range(n):
-		img = pg.image.load("sprites/" + name + str(i) + ".png").convert_alpha()
-		img = pg.transform.scale(img, (32, 32))
-		output.append(img)
-
-	return output
 
 def sprite(name):
 	img = pg.image.load("sprites/" + name + ".png").convert_alpha()
@@ -79,7 +60,7 @@ def mainGame(display):
 		display.fill((255, 255, 255))
 
 
-		for i in range(20):
+		for i in range(30):
 			for j in range(20):
 				display.blit(organicSpike.animate(tick), (i * 32, j * 32))
 
@@ -90,10 +71,10 @@ def mainGame(display):
 		preGameTime = gameTime
 
 pg.init()
-display = pg.display.set_mode((640, 640))
+display = pg.display.set_mode((960, 640))
 
-organicSpike = animator(loadArray("spoikeB", 6), 3)
+organicSpike = animator(split(pg, "block1", 6), 3)
+print(organicSpike.sprites)
 mainGame(display)
 
 pg.quit()
-
