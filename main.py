@@ -9,6 +9,8 @@ import collisions as col
 anim.pg = pg
 col.pg = pg
 
+bg = pg.image.load("sprites/bg.png")
+
 pg.init()
 display = pg.display.set_mode((960, 640))
 
@@ -183,6 +185,7 @@ def mainGame(display):
 		deltaTime = (gameTime * 60 - preGameTime * 60)
 
 		display.fill((255, 255, 255))
+		display.blit(bg, (0, 0))
 		mainSurf.fill((0, 0, 0, 0))
 
 		if enableShadow:
