@@ -25,5 +25,6 @@ def split(name, n):
 
 def sprite(name):
 	img = pg.image.load("sprites/" + name + ".png").convert_alpha()
-	img = pg.transform.scale2x(img)
+	w, h = img.get_size()
+	img = pg.transform.scale(img, (w * 2, h * 2))
 	return img

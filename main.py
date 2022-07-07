@@ -9,8 +9,6 @@ import collisions as col
 anim.pg = pg
 col.pg = pg
 
-bg = pg.image.load("sprites/bg.png")
-
 pg.init()
 display = pg.display.set_mode((960, 640))
 
@@ -42,7 +40,7 @@ blocks = [
 	block(anim.animator(anim.sprite("spoike")), True, True),    #4
 	block(anim.animator(anim.sprite("blockB"))),                #5 ---- B
 	block(anim.animator(anim.sprite("blockB1"))),               #6
-	block(anim.animator(anim.split("blockB2", 9), 1, True)),    #7
+	block(anim.animator(anim.split("blockB2", 9), 2, True)),    #7
 	block(anim.animator(anim.split("spoikeB", 6), 2), True, True), #8
 	block(anim.animator(anim.sprite("blockC"))),                #9 ---- C
 	block(anim.animator(anim.sprite("blockC1"))),               #10
@@ -55,6 +53,16 @@ bitmask = anim.split("bitmask", 16)
 colliderList = [[], [], []] # Dimensions A, B, C
 tiles = [{}, {}, {}]
 bitm = [{}, {}, {}]
+
+bg = pg.image.load("sprites/bg.png")
+logo = anim.sprite("logo")
+crtag = anim.sprite("creditsTag")
+playB = anim.sprite("play")
+playBH = anim.sprite("play-hover")
+playBP = anim.sprite("play-press")
+exitB = anim.sprite("exit")
+exitBH = anim.sprite("exit-hover")
+exitBP = anim.sprite("exit-press")
 
 def loadRoom(name):
 	global colliderList, tiles, bitm
@@ -146,6 +154,100 @@ def loadRoom(name):
 
 	return rx, ry, nn
 
+def blitRotateCenter(surf, image, angle, position, scale):
+	rotated_image = pg.transform.rotate(image, angle)
+	w, h = rotated_image.get_size()
+	rotated_image = pg.transform.scale(rotated_image, (int(w * scale), int(h * scale)))
+	new_rect = rotated_image.get_rect(center = image.get_rect().center)
+
+	nnR = pg.Rect(new_rect.x + position[0], new_rect.y + position[1], new_rect.w, new_rect.h)
+
+	surf.blit(rotated_image, nnR)
+
+def mainMenu(display):
+	pg.mixer.music.stop()
+	pg.mixer.music.unload()
+	pg.mixer.music.load("audio/music/menu.mp3")
+	pg.mixer.music.play(loops=-1, fade_ms=300)
+
+	running = True
+
+	tickF = tick = 0
+	deltaTime = 1
+
+	gameTimeStart = time()
+	preGameTime = gameTimeStart
+	fullR = False
+	hoverP = False
+	hoverE = False
+
+	playBRect = pg.Rect(960 // 2 - 64, 640 // 2 - 40, 128, 64)
+	exitBRect = pg.Rect(960 // 2 - 64, 640 // 2 + 40, 128, 64)
+	st = 210
+
+	while running:
+		pressed = False
+		for e in pg.event.get():
+			if e.type == pg.QUIT:
+				running = False
+				fullR = True
+			if e.type == pg.KEYDOWN:
+				if e.key == pg.K_k:
+					running = False
+			if e.type == pg.MOUSEBUTTONDOWN:
+				if e.button == 1: pressed = True
+
+		gameTime = time() - gameTimeStart
+		deltaTime = (gameTime * 60 - preGameTime * 60)
+
+		msx, msy = pg.mouse.get_pos()
+
+		display.fill((255, 255, 255))
+		display.blit(bg, (0, 0))
+		blitRotateCenter(display, logo, sin(tick / 60) * 6, (960 // 2 - 176 * 2, 40), 1 + ((sin(tick / 30) + 1) / 2) * 0.3)
+		display.blit(crtag, (960 - 270, 640 - 22))
+
+		pbTex = playB
+		if playBRect.collidepoint(msx, msy):
+			pbTex = playBH
+			if pressed:
+				pbTex = playBP
+				running = False
+		display.blit(pbTex, (playBRect.x, playBRect.y))
+		ebTex = exitB
+		if exitBRect.collidepoint(msx, msy):
+			ebTex = exitBH
+			if pressed:
+				ebTex = exitBP
+				running = False
+				fullR = True
+		display.blit(ebTex, (exitBRect.x, exitBRect.y))
+
+		if st >= 0:
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((st / 200) ** 2) * 320), 960, int(((st / 200) ** 2) * 320)))
+			st -= 5
+
+		pg.display.update()
+
+		tickF += deltaTime
+		tick = int(tickF)
+		preGameTime = gameTime
+
+	pg.mixer.music.fadeout(300)
+	if not fullR:
+		for i in range(211):
+			pg.event.get()
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((i / 200) ** 2) * 320)))
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((i / 200) ** 2) * 320), 960, int(((i / 200) ** 2) * 320)))
+			pg.display.update()
+			pg.time.delay(5)
+
+		pg.time.delay(1000)
+
+		mainGame(display)
+
+
 def mainGame(display):
 	global colliderList, tiles, bitm
 
@@ -164,8 +266,11 @@ def mainGame(display):
 	enableShadow = False
 
 	mainSurf = pg.Surface((960, 640), pg.SRCALPHA, 32)
+	shad = anim.sprite("shadow")
+	glow = anim.sprite("glow")
 
 	dimension = 0
+	st = 210
 
 	while running:
 		for e in pg.event.get():
@@ -196,9 +301,17 @@ def mainGame(display):
 			mainSurf.blit(tiles[dimension][i].animator.animate(tick), (i[0] * 32, i[1] * 32))
 			mainSurf.blit(bitmask[bitm[dimension][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
 
+		mainSurf.blit(shad, (px, py + 8), special_flags=pg.BLEND_RGBA_MULT)
+
+		display.blit(glow, (px - 32, py - 32))
 		display.blit(mainSurf, (0, 0))
-		display.blit(anim.sprite("playar"), (px, py))
+		display.blit(anim.sprite("playAr"), (px, py - 16))
 		display.blit(sh[dimension], (0, 0))
+
+		if st >= 0:
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((st / 200) ** 2) * 320), 960, int(((st / 200) ** 2) * 320)))
+			st -= 5
 
 		pg.display.update()
 
@@ -206,6 +319,6 @@ def mainGame(display):
 		tick = int(tickF)
 		preGameTime = gameTime
 
-mainGame(display)
+mainMenu(display)
 
 pg.quit()
