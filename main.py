@@ -75,6 +75,9 @@ def loadRoom(name):
 
 	n = [a, b, c]
 
+	nn = [pg.Surface((30, 20), pg.SRCALPHA, 32) for i in range(3)]
+
+	rx, ry = -1, -1
 	for r in range(3):
 		x = 0
 		y = 0
@@ -85,7 +88,10 @@ def loadRoom(name):
 			else:
 				v = int(i)
 				if v != 0:
-					tiles[r][(x, y)] = blocks[v - 1 + r * 4].create(colliderList, r, x, y, 0)
+					if v == 9:
+						rx = x
+						ry = y
+					else: tiles[r][(x, y)] = blocks[v - 1 + r * 4].create(colliderList, r, x, y, 0)
 			x += 1
 
 	for r in range(3):
@@ -97,13 +103,46 @@ def loadRoom(name):
 
 			x, y = i
 			bt = 0
+			sdbt = 0
 
-			if (x, y - 1) in dd: bt += 1
-			if (x - 1, y) in dd: bt += 2
-			if (x + 1, y) in dd: bt += 4
-			if (x, y + 1) in dd: bt += 8
+			if (x, y - 1) in dd:
+				bt += 1
+				if not tiles[r][(x, y - 1)].kill: sdbt += 1
+			elif y - 1 < 0:
+				bt += 1
+				sdbt += 1
+
+			if (x - 1, y) in dd:
+				bt += 2
+				if not tiles[r][(x - 1, y)].kill: sdbt += 2
+			elif x - 1 < 0:
+				bt += 2
+				sdbt += 2
+
+			if (x + 1, y) in dd:
+				bt += 4
+				if not tiles[r][(x + 1, y)].kill: sdbt += 4
+			elif x + 1 > 29:
+				bt += 4
+				sdbt += 4
+
+			if (x, y + 1) in dd:
+				bt += 8
+				if not tiles[r][(x, y + 1)].kill: sdbt += 8
+			elif y + 1 > 19:
+				bt += 8
+				sdbt += 8
+
+
+
+			if sdbt == 15: nn[r].set_at((x, y), (0, 0, 0))
 
 			bitm[r][i] = bt
+
+	for i in range(len(nn)):
+		nn[i] = pg.transform.smoothscale(nn[i], (960, 640))
+
+	return rx, ry, nn
 
 def mainGame(display):
 	global colliderList, tiles, bitm
@@ -113,20 +152,30 @@ def mainGame(display):
 	tickF = tick = 0
 	deltaTime = 1
 
+	px, py, sh = loadRoom("room1")
+	px *= 32
+	py *= 32
+
 	gameTimeStart = time()
 	preGameTime = gameTimeStart
 
+	enableShadow = False
+
 	mainSurf = pg.Surface((960, 640), pg.SRCALPHA, 32)
 
-	dimension = 1
+	dimension = 0
 
 	while running:
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
 			if e.type == pg.KEYDOWN:
-				if e.key == pg.K_RIGHT: dimension += 1
-				if e.key == pg.K_LEFT: dimension -= 1
+				if e.key == pg.K_RIGHT:
+					dimension += 1
+					px += 1
+				if e.key == pg.K_LEFT:
+					dimension -= 1
+					px -= 1
 
 				dimension %= 3
 
@@ -136,19 +185,24 @@ def mainGame(display):
 		display.fill((255, 255, 255))
 		mainSurf.fill((0, 0, 0, 0))
 
+		if enableShadow:
+			shadowSurf.fill((16, 16, 16))
+			shadowSurf.blit(shad, (px - 16*5, py - 16*5))
+
 		for i in tiles[dimension].keys():
 			mainSurf.blit(tiles[dimension][i].animator.animate(tick), (i[0] * 32, i[1] * 32))
 			mainSurf.blit(bitmask[bitm[dimension][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
 
 		display.blit(mainSurf, (0, 0))
+		display.blit(anim.sprite("playar"), (px, py))
+		display.blit(sh[dimension], (0, 0))
+
 		pg.display.update()
 
 		tickF += deltaTime
 		tick = int(tickF)
 		preGameTime = gameTime
-		print(deltaTime)
 
-loadRoom("room1")
 mainGame(display)
 
 pg.quit()
