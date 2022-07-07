@@ -244,7 +244,6 @@ def mainMenu(display):
 			pg.time.delay(5)
 
 		pg.time.delay(1000)
-
 		mainGame(display)
 
 
@@ -320,5 +319,12 @@ def mainGame(display):
 		preGameTime = gameTime
 
 mainMenu(display)
+
+for i in range(211):
+	pg.event.get()
+	pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((i / 200) ** 2) * 320)))
+	pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((i / 200) ** 2) * 320), 960, int(((i / 200) ** 2) * 320)))
+	pg.display.update()
+	pg.time.delay(5)
 
 pg.quit()
