@@ -2,12 +2,19 @@ import pygame as pg
 from math import *
 from time import *
 from random import *
+import os
+import webbrowser
 
 import animations as anim
 import collisions as col
 
 anim.pg = pg
 col.pg = pg
+
+editorURL = "file:///" + os.getcwd() + "/editor/index.html"
+
+def openEditor():
+	webbrowser.open_new_tab(editorURL)
 
 pg.init()
 display = pg.display.set_mode((960, 640))
@@ -256,7 +263,7 @@ def mainMenu(display):
 
 		display.blit(snakeask, (0, 0))
 		easeang = inOutQuadBlend(snangle / 180)
-		blitRotateCenter(display, logo, sin(tick / 60) * 6 - 540 * easeang, (960 // 2 - 176 * 2, 40), 1 + ((sin(tick / 30) + 1) / 2) * 0.3)
+		blitRotateCenter(display, logo, sin(tick / 60) * 6 - (360 * 2 + 180) * easeang, (960 // 2 - 176 * 2, 40), 1 + ((sin(tick / 30) + 1) / 2) * 0.3)
 		display.blit(crtag, (960 - 270, 640 - 22))
 
 		pbTex = playB
@@ -265,7 +272,7 @@ def mainMenu(display):
 			if pressed:
 				pbTex = playBP
 				running = False
-		display.blit(pbTex, (playBRect.x, playBRect.y))
+		blitRotateCenter(display, pbTex, (180) * easeang, (playBRect.x, playBRect.y), 1)
 		ebTex = exitB
 		if exitBRect.collidepoint(msx, msy):
 			ebTex = exitBH
@@ -273,7 +280,7 @@ def mainMenu(display):
 				ebTex = exitBP
 				running = False
 				fullR = True
-		display.blit(ebTex, (exitBRect.x, exitBRect.y))
+		blitRotateCenter(display, ebTex, (180) * easeang, (exitBRect.x, exitBRect.y), 1)
 
 		if st >= 0:
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
