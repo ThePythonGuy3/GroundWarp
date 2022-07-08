@@ -266,7 +266,7 @@ window.onload = () => {
 
 			for(let i = 0; i < e.length; i++){
 				if(e[i] == ";"){
-					x = 0;
+					x = -1;
 					y += 1;
 				} else {
 					paint(dimens, ctx, x, y, e[i]);

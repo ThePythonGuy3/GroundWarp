@@ -55,6 +55,7 @@ tiles = [{}, {}, {}]
 bitm = [{}, {}, {}]
 
 bg = pg.image.load("sprites/bg.png")
+logo = anim.sprite("logo")
 crtag = anim.sprite("creditsTag")
 playB = anim.sprite("play")
 playBH = anim.sprite("play-hover")
@@ -167,20 +168,11 @@ def blitRotateCenter(surf, image, angle, position, scale):
 
 	surf.blit(rotated_image, nnR)
 
-def inOutQuadBlend(t):
-	if t <= 0.5:
-		return 2.0 * t * t
-	t -= 0.5
-	return 2.0 * t * (1.0 - t) + 0.5
-
-
 def mainMenu(display):
 	pg.mixer.music.stop()
 	pg.mixer.music.unload()
 	pg.mixer.music.load("audio/music/menu.mp3")
 	pg.mixer.music.play(loops=-1, fade_ms=300)
-
-	logo = anim.sprite("logo")
 
 	running = True
 
@@ -202,7 +194,6 @@ def mainMenu(display):
 	snakeEnable = True
 	snakes = []
 	timeTrigger = True
-	snangle = 0
 
 	while running:
 		pressed = False
@@ -215,11 +206,7 @@ def mainMenu(display):
 					if e.key == snake[snakeProg]:
 						snakeProg += 1
 						if snakeProg >= 5:
-							pg.mixer.music.stop()
-							pg.mixer.music.unload()
-							pg.mixer.music.load("audio/music/snak.mp3")
-							pg.mixer.music.play(loops=-1)
-
+							pg.mixer.music.fadeout(300)
 							snakeEnable = False
 					else:
 						snakeProg = 0
@@ -248,15 +235,8 @@ def mainMenu(display):
 		for i in range(snakeProg):
 			display.blit(snektext[i], (i * 32 + 2, 640 - 34))
 
-		if not snakeEnable and snangle < 180:
-			snangle += 2
-
-		if snangle >= 90:
-			logo = anim.sprite("logo-snake")
-
 		display.blit(snakeask, (0, 0))
-		easeang = inOutQuadBlend(snangle / 180)
-		blitRotateCenter(display, logo, sin(tick / 60) * 6 - 540 * easeang, (960 // 2 - 176 * 2, 40), 1 + ((sin(tick / 30) + 1) / 2) * 0.3)
+		blitRotateCenter(display, logo, sin(tick / 60) * 6, (960 // 2 - 176 * 2, 40), 1 + ((sin(tick / 30) + 1) / 2) * 0.3)
 		display.blit(crtag, (960 - 270, 640 - 22))
 
 		pbTex = playB
