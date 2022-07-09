@@ -18,6 +18,8 @@ def openEditor():
 
 pg.init()
 display = pg.display.set_mode((960, 640))
+pg.display.set_caption("GroundWarp")
+pg.display.set_icon(anim.sprite("icon"))
 
 class block:
 	def __init__(self, animator, kill = False, half = False):
@@ -132,14 +134,14 @@ def loadRoom(name):
 				bt += 1
 				sdbt += 1
 
-			if (x - 1, y) in dd:
+			if (x - 1, y) in dd and not tiles[r][(x - 1, y)].kill:
 				bt += 2
 				if not tiles[r][(x - 1, y)].kill: sdbt += 2
 			elif x - 1 < 0:
 				bt += 2
 				sdbt += 2
 
-			if (x + 1, y) in dd:
+			if (x + 1, y) in dd and not tiles[r][(x + 1, y)].kill:
 				bt += 4
 				if not tiles[r][(x + 1, y)].kill: sdbt += 4
 			elif x + 1 > 29:
@@ -180,7 +182,7 @@ def inOutQuadBlend(t):
 	t -= 0.5
 	return 2.0 * t * (1.0 - t) + 0.5
 
-
+loops = ["audio/music/loop1.mp3"]
 def mainMenu(display):
 	pg.mixer.music.stop()
 	pg.mixer.music.unload()
@@ -225,7 +227,7 @@ def mainMenu(display):
 							pg.mixer.music.stop()
 							pg.mixer.music.unload()
 							pg.mixer.music.load("audio/music/snak.mp3")
-							pg.mixer.music.play(loops=-1)
+							pg.mixer.music.play(loops=-1, fade_ms=300)
 
 							snakeEnable = False
 					else:
@@ -309,6 +311,10 @@ def mainMenu(display):
 def mainGame(display):
 	global colliderList, tiles, bitm
 
+	pg.mixer.music.fadeout(300)
+	pg.mixer.music.load(choice(loops))
+	pg.mixer.music.play(loops=-1, fade_ms=300)
+
 	debug = False
 	running = True
 
@@ -343,12 +349,18 @@ def mainGame(display):
 	dimension = 0
 	st = 210
 
-	speed = 3
+	speed = 1.5
 	a = 0.3
 	vx = 2
 	vy = 8
 
 	wpressed = False
+
+	coyote = 0
+
+	frame = 0
+
+	retrigger = True
 
 	while running:
 		for e in pg.event.get():
@@ -395,6 +407,8 @@ def mainGame(display):
 
 		cols = [topCol, toppestCol, bottomCol, bottomestCol, rightCol, rightestCol, leftCol, leftestCol, killCol]
 
+		if bottomCol[0]: coyote = 20
+
 		lp = False
 		rp = False
 		if pg.key.get_pressed()[pg.K_d]:
@@ -404,8 +418,8 @@ def mainGame(display):
 			vx -= a * speed
 			lp = True
 		if pg.key.get_pressed()[pg.K_w]:
-			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0]):
-				if not bottomCol[0]:
+			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0] or coyote > 0):
+				if not bottomCol[0] and coyote == 0:
 					if rightCol[0]:
 						vx = -12
 					else: vx = 12
@@ -443,10 +457,10 @@ def mainGame(display):
 
 		mainSurf.blit(shad, (px, py + 8), special_flags=pg.BLEND_RGBA_MULT)
 
-		display.blit(glow, (px - 32, py - 32))
+		#display.blit(glow, (px - 32, py - 32))
 		display.blit(mainSurf, (0, 0))
 		display.blit(anim.sprite("playAr"), (px, py - 16))
-		display.blit(sh[dimension], (0, 0))
+		if not debug: display.blit(sh[dimension], (0, 0))
 
 		if st >= 0:
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
@@ -470,11 +484,25 @@ def mainGame(display):
 
 		vx *= 0.8
 
+		if int(time() * 2) % 2:
+			if retrigger:
+				print(frame)
+				frame = 0
+			retrigger = False
+		else:
+			retrigger = True
+
+		if coyote > 0: coyote -= 1
+
+		frame += 1
 		tickF += deltaTime
 		tick = int(tickF)
 		preGameTime = gameTime
 
 mainMenu(display)
+
+pg.mixer.music.fadeout(300)
+pg.mixer.music.unload()
 
 for i in range(211):
 	pg.event.get()
