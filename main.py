@@ -329,34 +329,33 @@ def mainGame(display):
 	glow = anim.sprite("glow")
 
 	topBox = pg.Rect(0, 0, 20, 6)
+	toppestBox = pg.Rect(0, 0, 20, 6)
 	bottomBox = pg.Rect(0, 0, 20, 6)
+	bottomestBox = pg.Rect(0, 0, 20, 6)
 	rightBox = pg.Rect(0, 0, 6, 24)
+	rightestBox = pg.Rect(0, 0, 6, 24)
 	leftBox = pg.Rect(0, 0, 6, 24)
+	leftestBox = pg.Rect(0, 0, 6, 24)
 	killBox = pg.Rect(0, 0, 12, 18)
 
-	hitboxes = [topBox, bottomBox, rightBox, leftBox, killBox]
+	hitboxes = [topBox, toppestBox, bottomBox, bottomestBox, rightBox, rightestBox, leftBox, leftestBox, killBox]
 
 	dimension = 0
 	st = 210
 
-	speed = 5
+	speed = 3
 	a = 0.3
 	vx = 2
 	vy = 8
+
+	wpressed = False
 
 	while running:
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
-			if pg.key.get_pressed()[pg.K_d]:
-				vx += a * speed
-			if pg.key.get_pressed()[pg.K_a]:
-				vx -= a * speed
 
 			if e.type == pg.KEYDOWN:
-				if e.key == pg.K_w:
-					vy = -6
-
 				if e.key == pg.K_p:
 					debug = not debug
 
@@ -367,27 +366,68 @@ def mainGame(display):
 
 		topBox.x = px + 6
 		topBox.y = py - 2
+		toppestBox.x = px + 6
+		toppestBox.y = py - 1
 		bottomBox.x = px + 6
-		bottomBox.y = py + 27
+		bottomBox.y = py + 28
+		bottomestBox.x = px + 6
+		bottomestBox.y = py + 27
 		leftBox.x = px + 4
 		leftBox.y = py + 4
+		leftestBox.x = px + 5
+		leftestBox.y = py + 4
 		rightBox.x = px + 22
 		rightBox.y = py + 4
+		rightestBox.x = px + 21
+		rightestBox.y = py + 4
 		killBox.x = px + 10
 		killBox.y = py + 10
 
 		rightCol = col.rectCollide(colliderList[dimension], rightBox, True)
+		rightestCol = col.rectCollide(colliderList[dimension], rightestBox, True)
 		leftCol = col.rectCollide(colliderList[dimension], leftBox, True)
+		leftestCol = col.rectCollide(colliderList[dimension], leftestBox, True)
 		topCol = col.rectCollide(colliderList[dimension], topBox, True)
+		toppestCol = col.rectCollide(colliderList[dimension], toppestBox, True)
 		bottomCol = col.rectCollide(colliderList[dimension], bottomBox, True)
+		bottomestCol = col.rectCollide(colliderList[dimension], bottomestBox, True)
 		killCol = col.rectCollide(colliderList[dimension], killBox)
 
-		if vy < 9.8: vy += a
+		cols = [topCol, toppestCol, bottomCol, bottomestCol, rightCol, rightestCol, leftCol, leftestCol, killCol]
+
+		lp = False
+		rp = False
+		if pg.key.get_pressed()[pg.K_d]:
+			vx += a * speed
+			rp = True
+		if pg.key.get_pressed()[pg.K_a]:
+			vx -= a * speed
+			lp = True
+		if pg.key.get_pressed()[pg.K_w]:
+			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0]):
+				if not bottomCol[0]:
+					if rightCol[0]:
+						vx = -12
+					else: vx = 12
+				vy = -6
+
+			wpressed = True
+		else:
+			wpressed = False
+
+		if vy < 9.8:
+			ama = a
+			if vy > 0 and ((rightCol[0] and rp) or (leftCol[0] and lp)): ama = a / 5
+			vy += ama
 
 		if rightCol[0] and vx > 0: vx = 0
+		if rightestCol[0]: vx = -0.5
 		if leftCol[0] and vx < 0: vx = 0
+		if leftestCol[0]: vx = 0.5
 		if topCol[0] and vy < 0: vy = 0
+		if toppestCol[0]: vy = 0.5
 		if bottomCol[0] and vy > 0: vy = 0
+		if bottomestCol[0]: vy = -0.5
 
 		display.fill((255, 255, 255))
 		display.blit(bg, (0, 0))
@@ -418,8 +458,10 @@ def mainGame(display):
 				color = (120, 240, 112)
 				if i.kill: color = (223, 36, 36)
 				pg.draw.rect(display, color, i, 1)
-			for i in hitboxes:
-				pg.draw.rect(display, (240, 60, 200), i, 1)
+			for i in range(len(hitboxes)):
+				color = (240, 60, 200)
+				if cols[i][0]: color = (90, 240, 200)
+				pg.draw.rect(display, color, hitboxes[i], 1)
 
 		pg.display.update()
 

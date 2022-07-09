@@ -11,7 +11,6 @@ def rectCollide(colliderList, rect, ignore = False):
 	for i in colliderList:
 		if rect.colliderect(i.rect):
 			if ignore and i.kill: continue
-			
 			collide = True
 			if i.kill: kill = True
 	return [collide, kill]
