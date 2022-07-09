@@ -33,9 +33,7 @@ class block:
 				if rotation == 2: colliderList[dimension].append(col.collider(tilex * 2 + i, tiley * 2, self.kill))
 				if rotation == 3: colliderList[dimension].append(col.collider(tilex * 2 + 1, tiley * 2 + i, self.kill))
 		else:
-			for i in range(2):
-				for j in range(2):
-					colliderList[dimension].append(col.collider(tilex * 2 + i, tiley * 2 + i, self.kill))
+			colliderList[dimension].append(col.collider(tilex * 2, tiley * 2, self.kill, 32))
 
 		return self
 
@@ -73,6 +71,8 @@ snek = anim.animator(anim.split("gamesnek", 11), 2)
 snakeask = anim.sprite("snakeask")
 snektext = anim.split("snake", 5)
 snekfx = [pg.mixer.Sound("audio/sfx/snek" + str(i + 1) + ".mp3") for i in range(4)]
+coll = anim.sprite("collider")
+collkill = anim.sprite("colliderkill")
 
 def loadRoom(name):
 	global colliderList, tiles, bitm
@@ -309,6 +309,7 @@ def mainMenu(display):
 def mainGame(display):
 	global colliderList, tiles, bitm
 
+	debug = False
 	running = True
 
 	tickF = tick = 0
@@ -327,25 +328,66 @@ def mainGame(display):
 	shad = anim.sprite("shadow")
 	glow = anim.sprite("glow")
 
+	topBox = pg.Rect(0, 0, 20, 6)
+	bottomBox = pg.Rect(0, 0, 20, 6)
+	rightBox = pg.Rect(0, 0, 6, 24)
+	leftBox = pg.Rect(0, 0, 6, 24)
+	killBox = pg.Rect(0, 0, 12, 18)
+
+	hitboxes = [topBox, bottomBox, rightBox, leftBox, killBox]
+
 	dimension = 0
 	st = 210
+
+	speed = 5
+	a = 0.3
+	vx = 2
+	vy = 8
 
 	while running:
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
+			if pg.key.get_pressed()[pg.K_d]:
+				vx += a * speed
+			if pg.key.get_pressed()[pg.K_a]:
+				vx -= a * speed
+
 			if e.type == pg.KEYDOWN:
-				if e.key == pg.K_RIGHT:
-					dimension += 1
-					px += 1
-				if e.key == pg.K_LEFT:
-					dimension -= 1
-					px -= 1
+				if e.key == pg.K_w:
+					vy = -6
+
+				if e.key == pg.K_p:
+					debug = not debug
 
 				dimension %= 3
 
 		gameTime = time() - gameTimeStart
 		deltaTime = (gameTime * 60 - preGameTime * 60)
+
+		topBox.x = px + 6
+		topBox.y = py - 2
+		bottomBox.x = px + 6
+		bottomBox.y = py + 27
+		leftBox.x = px + 4
+		leftBox.y = py + 4
+		rightBox.x = px + 22
+		rightBox.y = py + 4
+		killBox.x = px + 10
+		killBox.y = py + 10
+
+		rightCol = col.rectCollide(colliderList[dimension], rightBox, True)
+		leftCol = col.rectCollide(colliderList[dimension], leftBox, True)
+		topCol = col.rectCollide(colliderList[dimension], topBox, True)
+		bottomCol = col.rectCollide(colliderList[dimension], bottomBox, True)
+		killCol = col.rectCollide(colliderList[dimension], killBox)
+
+		if vy < 9.8: vy += a
+
+		if rightCol[0] and vx > 0: vx = 0
+		if leftCol[0] and vx < 0: vx = 0
+		if topCol[0] and vy < 0: vy = 0
+		if bottomCol[0] and vy > 0: vy = 0
 
 		display.fill((255, 255, 255))
 		display.blit(bg, (0, 0))
@@ -371,7 +413,20 @@ def mainGame(display):
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((st / 200) ** 2) * 320), 960, int(((st / 200) ** 2) * 320)))
 			st -= 5
 
+		if debug:
+			for i in colliderList[dimension]:
+				color = (120, 240, 112)
+				if i.kill: color = (223, 36, 36)
+				pg.draw.rect(display, color, i, 1)
+			for i in hitboxes:
+				pg.draw.rect(display, (240, 60, 200), i, 1)
+
 		pg.display.update()
+
+		px += vx
+		py += vy
+
+		vx *= 0.8
 
 		tickF += deltaTime
 		tick = int(tickF)
