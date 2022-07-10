@@ -88,8 +88,15 @@ colliderList = [[], [], []] # Dimensions A, B, C
 tiles = [{}, {}, {}]
 bitm = [{}, {}, {}]
 
+mute = [
+	False, #mute sound
+	False  #mute music
+]
+
 backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("factorybg")]
 crtag = anim.sprite("creditsTag")
+
+muteButtons = anim.splitCustom("mute-buttons", 3, 24, 24)
 
 playB = anim.sprite("play")
 playBH = anim.sprite("play-hover")
@@ -216,6 +223,8 @@ def inOutQuadBlend(t):
 	t -= 0.5
 	return 2.0 * t * (1.0 - t) + 0.5
 
+muteButtonsRects = [pg.Rect(0, 640 - 48, 48, 48), pg.Rect(48, 640 - 48, 48, 48)]
+
 loops = ["audio/music/loop1.mp3"]
 def mainMenu(display):
 	pg.mixer.music.stop()
@@ -276,11 +285,15 @@ def mainMenu(display):
 		msx, msy = pg.mouse.get_pos()
 
 		display.fill((255, 255, 255))
+
+		pg.mixer.music.set_volume(not mute[0])
+
 		if not snakeEnable:
 			if len(snakes) < 1000:
 				snakes.append((randint(0, 960), randint(0, 640), randint(0, 360), randint(0, 90)))
 			for i in snakes:
-				blitRotateCenter(display, snek.animate(tick + i[3]), i[2], i[:2:], 1)
+				snek.updateAnimationFrame(tick + i[3])
+				blitRotateCenter(display, snek.animate(), i[2], i[:2:], 1)
 			if not (int(time() * 2) % 2):
 				timeTrigger = True
 
@@ -324,6 +337,16 @@ def mainMenu(display):
 				running = False
 				fullR = True
 		blitRotateCenter(display, ebTex, (180) * easeang, (exitBRect.x, exitBRect.y), 1)
+
+		if muteButtonsRects[0].collidepoint(msx, msy):
+			if pressed: mute[0] = not mute[0]
+		blitRotateCenter(display, muteButtons[0], (180) * easeang, (muteButtonsRects[0].x, muteButtonsRects[0].y), 1)
+		if mute[0]: blitRotateCenter(display, muteButtons[2], (180) * easeang, (muteButtonsRects[0].x, muteButtonsRects[0].y), 1)
+
+		if muteButtonsRects[1].collidepoint(msx, msy):
+			if pressed: mute[1] = not mute[1]
+		blitRotateCenter(display, muteButtons[1], (180) * easeang, (muteButtonsRects[1].x, muteButtonsRects[1].y), 1)
+		if mute[1]: blitRotateCenter(display, muteButtons[2], (180) * easeang, (muteButtonsRects[1].x, muteButtonsRects[1].y), 1)
 
 		if st >= 0:
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
@@ -434,11 +457,18 @@ def mainGame(display):
 
 	retrigger = True
 
+	previousDimension = 0
+
 	generateBlocksBuffer(tiles, dimension, tick)
 
 	updateBackground(dimension)
 
 	while running:
+		pressed = False
+		if previousDimension != dimension:
+			previousDimension = dimension
+			generateBlocksBuffer(tiles, dimension, tick)
+
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
@@ -447,8 +477,15 @@ def mainGame(display):
 				if e.key == pg.K_p:
 					debug = not debug
 
-				dimension %= 3
+				if e.key == pg.K_RIGHT:
+					dimension += 1
+				if e.key == pg.K_LEFT:
+					dimension -= 1
 
+			if e.type == pg.MOUSEBUTTONDOWN:
+				if e.button == 1: pressed = True
+
+				dimension %= 3
 		gameTime = time() - gameTimeStart
 		deltaTime = (gameTime * 60 - preGameTime * 60)
 
@@ -483,7 +520,9 @@ def mainGame(display):
 
 		cols = [topCol, toppestCol, bottomCol, bottomestCol, rightCol, rightestCol, leftCol, leftestCol, killCol]
 
-		if bottomCol[0]: coyote = 20
+		msx, msy = pg.mouse.get_pos()
+
+		if bottomCol[0]: coyote = 6
 
 		lp = False
 		rp = False
@@ -520,7 +559,11 @@ def mainGame(display):
 
 		if vy < 9.8:
 			ama = a
-			if vy > 0 and ((rightCol[0] and rp) or (leftCol[0] and lp)): ama = a / 5
+			if vy > 0 and ((rightCol[0] and rp) or (leftCol[0] and lp)):
+				ama = a / 5
+				playerState = playerStates["onWall"]
+				if rightCol[0]: playerDirection = playerDirections["left"]
+				elif leftCol[0]: playerDirection = playerDirections["right"]
 			vy += ama
 
 		if rightCol[0] and vx > 0: vx = 0
@@ -533,7 +576,8 @@ def mainGame(display):
 		if bottomestCol[0]: vy = -0.5
 
 		display.fill((255, 255, 255))
-		mainSurf.blit(bg, (0, 0))
+		display.blit(bg, (0, 0))
+		mainSurf.fill((0, 0, 0, 0))
 
 		if enableShadow:
 			shadowSurf.fill((16, 16, 16))
@@ -563,6 +607,18 @@ def mainGame(display):
 				color = (240, 60, 200)
 				if cols[i][0]: color = (90, 240, 200)
 				pg.draw.rect(display, color, hitboxes[i], 1)
+
+		pg.mixer.music.set_volume(not mute[0])
+
+		if muteButtonsRects[0].collidepoint(msx, msy):
+			if pressed: mute[0] = not mute[0]
+		display.blit(muteButtons[0], (muteButtonsRects[0].x, muteButtonsRects[0].y))
+		if mute[0]: display.blit(muteButtons[2], (muteButtonsRects[0].x, muteButtonsRects[0].y))
+
+		if muteButtonsRects[1].collidepoint(msx, msy):
+			if pressed: mute[1] = not mute[1]
+		display.blit(muteButtons[1], (muteButtonsRects[1].x, muteButtonsRects[1].y))
+		if mute[1]: display.blit(muteButtons[2], (muteButtonsRects[1].x, muteButtonsRects[1].y))
 
 		pg.display.update()
 
