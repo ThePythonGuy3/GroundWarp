@@ -61,14 +61,21 @@ colliderList = [[], [], []] # Dimensions A, B, C
 tiles = [{}, {}, {}]
 bitm = [{}, {}, {}]
 
-bg = pg.image.load("sprites/bg.png")
+backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("factorybg")]
 crtag = anim.sprite("creditsTag")
+
 playB = anim.sprite("play")
 playBH = anim.sprite("play-hover")
 playBP = anim.sprite("play-press")
+
 exitB = anim.sprite("exit")
 exitBH = anim.sprite("exit-hover")
 exitBP = anim.sprite("exit-press")
+
+makeB = anim.sprite("make")
+makeBH = anim.sprite("make-hover")
+makeBP = anim.sprite("make-press")
+
 snek = anim.animator(anim.split("gamesnek", 11), 2)
 snakeask = anim.sprite("snakeask")
 snektext = anim.split("snake", 5)
@@ -203,7 +210,8 @@ def mainMenu(display):
 	hoverE = False
 
 	playBRect = pg.Rect(960 // 2 - 64, 640 // 2 - 40, 128, 64)
-	exitBRect = pg.Rect(960 // 2 - 64, 640 // 2 + 40, 128, 64)
+	exitBRect = pg.Rect(960 // 2 - 64, 640 // 2 + 120, 128, 64)
+	makeBRect = pg.Rect(960 // 2 - 64, 640 // 2 + 40, 128, 64)
 	st = 210
 
 	snake = [pg.K_s, pg.K_n, pg.K_a, pg.K_k, pg.K_e]
@@ -241,7 +249,6 @@ def mainMenu(display):
 		msx, msy = pg.mouse.get_pos()
 
 		display.fill((255, 255, 255))
-		display.blit(bg, (0, 0))
 		if not snakeEnable:
 			if len(snakes) < 1000:
 				snakes.append((randint(0, 960), randint(0, 640), randint(0, 360), randint(0, 90)))
@@ -275,6 +282,13 @@ def mainMenu(display):
 				pbTex = playBP
 				running = False
 		blitRotateCenter(display, pbTex, (180) * easeang, (playBRect.x, playBRect.y), 1)
+		mbTex = makeB
+		if makeBRect.collidepoint(msx, msy):
+			mbTex = makeBH
+			if pressed:
+				mbTex = makeBP
+				openEditor()
+		blitRotateCenter(display, mbTex, (180) * easeang, (makeBRect.x, makeBRect.y), 1)
 		ebTex = exitB
 		if exitBRect.collidepoint(msx, msy):
 			ebTex = exitBH
@@ -307,9 +321,34 @@ def mainMenu(display):
 		pg.time.delay(1000)
 		mainGame(display)
 
+blocksBuffer = pg.Surface((960, 640), pg.SRCALPHA, 32)
+bg = pg.Surface((960, 640))
+
+def generateBlocksBuffer(tiles, dimension, tick):
+	global blocksBuffer
+	blocksBuffer.fill((0, 0, 0, 0))
+	for i in tiles[dimension].keys():
+		blocksBuffer.blit(tiles[dimension][i].animator.animate(), (i[0] * 32, i[1] * 32))
+		blocksBuffer.blit(bitmask[bitm[dimension][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
+
+def updateBlocksBuffer(tiles, dimension, tick):
+	global blocksBuffer
+	for i in tiles[dimension].keys():
+		tiles[dimension][i].animator.updateAnimationFrame(tick)
+
+		if tiles[dimension][i].animator.animationCheck():
+			blocksBuffer.blit(tiles[dimension][i].animator.animate(), (i[0] * 32, i[1] * 32))
+			blocksBuffer.blit(bitmask[bitm[dimension][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
+
+def updateBackground(dimension):
+	global bg
+	bg.blit(backgrounds[dimension], (0, 0))
+
+
+
 
 def mainGame(display):
-	global colliderList, tiles, bitm
+	global colliderList, tiles, bitm, blocksBuffer
 
 	pg.mixer.music.fadeout(300)
 	pg.mixer.music.load(choice(loops))
@@ -361,6 +400,10 @@ def mainGame(display):
 	frame = 0
 
 	retrigger = True
+
+	generateBlocksBuffer(tiles, dimension, tick)
+
+	updateBackground(dimension)
 
 	while running:
 		for e in pg.event.get():
@@ -444,16 +487,14 @@ def mainGame(display):
 		if bottomestCol[0]: vy = -0.5
 
 		display.fill((255, 255, 255))
-		display.blit(bg, (0, 0))
-		mainSurf.fill((0, 0, 0, 0))
+		mainSurf.blit(bg, (0, 0))
 
 		if enableShadow:
 			shadowSurf.fill((16, 16, 16))
 			shadowSurf.blit(shad, (px - 16*5, py - 16*5))
 
-		for i in tiles[dimension].keys():
-			mainSurf.blit(tiles[dimension][i].animator.animate(tick), (i[0] * 32, i[1] * 32))
-			mainSurf.blit(bitmask[bitm[dimension][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
+		updateBlocksBuffer(tiles, dimension, tick)
+		mainSurf.blit(blocksBuffer, (0, 0))
 
 		mainSurf.blit(shad, (px, py + 8), special_flags=pg.BLEND_RGBA_MULT)
 
@@ -509,6 +550,6 @@ for i in range(211):
 	pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((i / 200) ** 2) * 320)))
 	pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((i / 200) ** 2) * 320), 960, int(((i / 200) ** 2) * 320)))
 	pg.display.update()
-	pg.time.delay(5)
+	pg.time.delay(1)
 
 pg.quit()

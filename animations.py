@@ -5,13 +5,23 @@ class animator:
 	def __init__(self, sprites, speed = 1, pingpong = False):
 		self.sprites = sprites
 		self.speed = speed
-		self.pingpong = pingpong
+		self.pingpong = pingpong #animation going back and forth or nah
+		self.lastFrame = -1
+		self.currentAnimationFrame = -1
+		self.animated = (type(self.sprites) == list)
 
-	def animate(self, tick):
-		if type(self.sprites) != list: return self.sprites
-		tickP = int((tick / 60) * self.speed * pi) % len(self.sprites)
-		if self.pingpong: tickP = int(round(abs(sin(tick / 60 * (self.speed))) * (len(self.sprites) - 1)))
-		return self.sprites[tickP]
+	def updateAnimationFrame(self, tick):
+		if self.animated:
+			self.currentAnimationFrame = int((tick / 60) * self.speed * pi) % len(self.sprites)
+			if self.pingpong: self.currentAnimationFrame = int(round(abs(sin(tick / 60 * (self.speed))) * (len(self.sprites) - 1)))
+
+	def animationCheck(self):
+		if not self.animated: return False
+		return self.lastFrame != self.currentAnimationFrame
+
+	def animate(self):
+		if not self.animated: return self.sprites
+		return self.sprites[self.currentAnimationFrame]
 
 def split(name, n):
 	img = pg.image.load("sprites/" + name + ".png")
@@ -22,6 +32,10 @@ def split(name, n):
 		img2 = pg.transform.scale(surf, (32, 32))
 		output.append(img2)
 	return output
+
+def scale2x(surf):
+	return pg.transform.scale(surf, (surf.get_size()[0] * 2, surf.get_size()[1] * 2))
+
 
 def sprite(name):
 	img = pg.image.load("sprites/" + name + ".png").convert_alpha()
