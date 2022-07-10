@@ -33,12 +33,18 @@ def split(name, n):
 		output.append(img2)
 	return output
 
-def scale2x(surf):
-	return pg.transform.scale(surf, (surf.get_size()[0] * 2, surf.get_size()[1] * 2))
+def splitCustom(name, n, width, height, flipHorizontally = False, flipVertically = False):
+	img = pg.image.load("sprites/" + name + ".png")
+	output = []
+	for i in range(n):
+		surf = pg.Surface((width, height), pg.SRCALPHA, 32)
+		surf.blit(img, (0, 0), (i * width, 0, width, height))
+		img2 = pg.transform.scale(surf, (width * 2, height * 2))
+		output.append(pg.transform.flip(img2, flipHorizontally, flipVertically))
+	return output
 
-
-def sprite(name):
+def sprite(name, flipHorizontally = False, flipVertically = False):
 	img = pg.image.load("sprites/" + name + ".png").convert_alpha()
 	w, h = img.get_size()
 	img = pg.transform.scale(img, (w * 2, h * 2))
-	return img
+	return pg.transform.flip(img, flipHorizontally, flipVertically)

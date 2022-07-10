@@ -55,6 +55,33 @@ blocks = [
 	block(anim.animator(anim.sprite("spoikeC")), True, True)    #12
 ]
 
+playerSprites = [
+	anim.animator(anim.sprite("anastasia-stand")), #idle
+	anim.animator(anim.splitCustom("anastasia-run", 6, 16, 24), 3), #running
+	anim.animator(anim.sprite("anastasia-fall")), #falling
+	anim.animator(anim.sprite("anastasia-wall")), #on wall
+
+	anim.animator(anim.sprite("anastasia-stand", True)), #idle
+	anim.animator(anim.splitCustom("anastasia-run", 6, 16, 24, True), 3), #running
+	anim.animator(anim.sprite("anastasia-fall", True)), #falling
+	anim.animator(anim.sprite("anastasia-wall", True)) #on wall
+]
+
+playerStates = {
+	"idle": 0,
+	"running": 1,
+	"falling": 2,
+	"onWall": 3
+}
+
+playerDirections = {
+	"right": False,
+	"left": True
+}
+
+playerDirection = False
+playerState = 0
+
 bitmask = anim.split("bitmask", 16)
 
 colliderList = [[], [], []] # Dimensions A, B, C
@@ -344,11 +371,17 @@ def updateBackground(dimension):
 	global bg
 	bg.blit(backgrounds[dimension], (0, 0))
 
+def getPlayerSprite(tick):
+	global playerState, playerSprites, playerDirection, playerDirections
+	playerSprites[playerState + playerDirection * 4].updateAnimationFrame(tick)
+
+	return playerSprites[playerState + playerDirection * 4].animate()
+
 
 
 
 def mainGame(display):
-	global colliderList, tiles, bitm, blocksBuffer
+	global colliderList, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
 
 	pg.mixer.music.fadeout(300)
 	pg.mixer.music.load(choice(loops))
@@ -460,6 +493,18 @@ def mainGame(display):
 		if pg.key.get_pressed()[pg.K_a]:
 			vx -= a * speed
 			lp = True
+
+		if int(vy) != 0:
+			playerState = playerStates["falling"]
+		elif int(vx) == 0:
+			playerState = playerStates["idle"]
+		else:
+			playerState = playerStates["running"]
+			if vx > 0:
+				playerDirection = playerDirections["right"]
+			elif vx < 0:
+				playerDirection = playerDirections["left"]
+
 		if pg.key.get_pressed()[pg.K_w]:
 			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0] or coyote > 0):
 				if not bottomCol[0] and coyote == 0:
@@ -471,6 +516,7 @@ def mainGame(display):
 			wpressed = True
 		else:
 			wpressed = False
+
 
 		if vy < 9.8:
 			ama = a
@@ -500,7 +546,7 @@ def mainGame(display):
 
 		#display.blit(glow, (px - 32, py - 32))
 		display.blit(mainSurf, (0, 0))
-		display.blit(anim.sprite("playAr"), (px, py - 16))
+		display.blit(getPlayerSprite(tick), (px, py - 16))
 		if not debug: display.blit(sh[dimension], (0, 0))
 
 		if st >= 0:
