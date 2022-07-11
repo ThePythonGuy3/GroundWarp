@@ -17,6 +17,7 @@ def openEditor():
 	webbrowser.open_new_tab(editorURL)
 
 pg.init()
+cock = pg.time.Clock()
 display = pg.display.set_mode((960, 640))
 pg.display.set_caption("GroundWarp")
 pg.display.set_icon(anim.sprite("icon"))
@@ -239,8 +240,6 @@ def mainMenu(display):
 	tickF = tick = 0
 	deltaTime = 1
 
-	gameTimeStart = time()
-	preGameTime = gameTimeStart
 	fullR = False
 	hoverP = False
 	hoverE = False
@@ -279,8 +278,7 @@ def mainMenu(display):
 			if e.type == pg.MOUSEBUTTONDOWN:
 				if e.button == 1: pressed = True
 
-		gameTime = time() - gameTimeStart
-		deltaTime = (gameTime * 60 - preGameTime * 60)
+		deltaTime = cock.tick(60)
 
 		msx, msy = pg.mouse.get_pos()
 
@@ -355,9 +353,8 @@ def mainMenu(display):
 
 		pg.display.update()
 
-		tickF += deltaTime
+		tickF += deltaTime / 15
 		tick = int(tickF)
-		preGameTime = gameTime
 
 	pg.mixer.music.fadeout(300)
 	if not fullR:
@@ -400,9 +397,6 @@ def getPlayerSprite(tick):
 
 	return playerSprites[playerState + playerDirection * 4].animate()
 
-
-
-
 def mainGame(display):
 	global colliderList, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
 
@@ -419,9 +413,8 @@ def mainGame(display):
 	px, py, sh = loadRoom("room1")
 	px *= 32
 	py *= 32
-
-	gameTimeStart = time()
-	preGameTime = gameTimeStart
+	ipx = px
+	ipy = py
 
 	enableShadow = False
 
@@ -431,8 +424,8 @@ def mainGame(display):
 
 	topBox = pg.Rect(0, 0, 20, 6)
 	toppestBox = pg.Rect(0, 0, 20, 6)
-	bottomBox = pg.Rect(0, 0, 20, 6)
-	bottomestBox = pg.Rect(0, 0, 20, 6)
+	bottomBox = pg.Rect(0, 0, 14, 6)
+	bottomestBox = pg.Rect(0, 0, 14, 6)
 	rightBox = pg.Rect(0, 0, 6, 24)
 	rightestBox = pg.Rect(0, 0, 6, 24)
 	leftBox = pg.Rect(0, 0, 6, 24)
@@ -444,10 +437,10 @@ def mainGame(display):
 	dimension = 0
 	st = 210
 
-	speed = 1.5
-	a = 0.3
-	vx = 2
-	vy = 8
+	speed = 32
+	a = 16
+	vx = 0
+	vy = 0
 
 	wpressed = False
 
@@ -486,17 +479,19 @@ def mainGame(display):
 				if e.button == 1: pressed = True
 
 				dimension %= 3
-		gameTime = time() - gameTimeStart
-		deltaTime = (gameTime * 60 - preGameTime * 60)
+
+		deltaTime = cock.tick(60) / 1000
+
+		#if deltaTime == 0 or abs(deltaTime) > 5: deltaTime = 1
 
 		topBox.x = px + 6
 		topBox.y = py - 2
 		toppestBox.x = px + 6
 		toppestBox.y = py - 1
-		bottomBox.x = px + 6
-		bottomBox.y = py + 28
-		bottomestBox.x = px + 6
-		bottomestBox.y = py + 27
+		bottomBox.x = px + 9
+		bottomBox.y = py + 27
+		bottomestBox.x = px + 9
+		bottomestBox.y = py + 26
 		leftBox.x = px + 4
 		leftBox.y = py + 4
 		leftestBox.x = px + 5
@@ -522,18 +517,20 @@ def mainGame(display):
 
 		msx, msy = pg.mouse.get_pos()
 
+		print(bottomCol)
+
 		if bottomCol[0]: coyote = 6
 
 		lp = False
 		rp = False
 		if pg.key.get_pressed()[pg.K_d]:
-			vx += a * speed
+			vx += speed * deltaTime
 			rp = True
 		if pg.key.get_pressed()[pg.K_a]:
-			vx -= a * speed
+			vx -= speed * deltaTime
 			lp = True
 
-		if int(vy) != 0:
+		if not bottomCol[0]:
 			playerState = playerStates["falling"]
 		elif int(vx) == 0:
 			playerState = playerStates["idle"]
@@ -548,32 +545,32 @@ def mainGame(display):
 			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0] or coyote > 0):
 				if not bottomCol[0] and coyote == 0:
 					if rightCol[0]:
-						vx = -12
-					else: vx = 12
-				vy = -6
+						vx = -8 * deltaTime
+					else: vx = 8 * deltaTime
+				vy = -320
 
 			wpressed = True
 		else:
 			wpressed = False
 
-
-		if vy < 9.8:
+		if vy < 512:
 			ama = a
 			if vy > 0 and ((rightCol[0] and rp) or (leftCol[0] and lp)):
-				ama = a / 5
+				vy = 32
+				ama = 0
 				playerState = playerStates["onWall"]
 				if rightCol[0]: playerDirection = playerDirections["left"]
 				elif leftCol[0]: playerDirection = playerDirections["right"]
 			vy += ama
 
 		if rightCol[0] and vx > 0: vx = 0
-		if rightestCol[0]: vx = -0.5
+		if rightestCol[0]: vx = -1
 		if leftCol[0] and vx < 0: vx = 0
-		if leftestCol[0]: vx = 0.5
+		if leftestCol[0]: vx = 1
 		if topCol[0] and vy < 0: vy = 0
-		if toppestCol[0]: vy = 0.5
+		if toppestCol[0]: vy = 64
 		if bottomCol[0] and vy > 0: vy = 0
-		if bottomestCol[0]: vy = -0.5
+		if bottomestCol[0]: vy = -64
 
 		display.fill((255, 255, 255))
 		display.blit(bg, (0, 0))
@@ -592,11 +589,6 @@ def mainGame(display):
 		display.blit(mainSurf, (0, 0))
 		display.blit(getPlayerSprite(tick), (px, py - 16))
 		if not debug: display.blit(sh[dimension], (0, 0))
-
-		if st >= 0:
-			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
-			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((st / 200) ** 2) * 320), 960, int(((st / 200) ** 2) * 320)))
-			st -= 5
 
 		if debug:
 			for i in colliderList[dimension]:
@@ -620,16 +612,14 @@ def mainGame(display):
 		display.blit(muteButtons[1], (muteButtonsRects[1].x, muteButtonsRects[1].y))
 		if mute[1]: display.blit(muteButtons[2], (muteButtonsRects[1].x, muteButtonsRects[1].y))
 
-		pg.display.update()
-
 		px += vx
-		py += vy
+		py += vy * deltaTime
 
 		vx *= 0.8
 
 		if int(time() * 2) % 2:
 			if retrigger:
-				print(frame)
+				print(frame, deltaTime)
 				frame = 0
 			retrigger = False
 		else:
@@ -638,9 +628,17 @@ def mainGame(display):
 		if coyote > 0: coyote -= 1
 
 		frame += 1
-		tickF += deltaTime
-		tick = int(tickF)
-		preGameTime = gameTime
+		tick += 1
+
+		if st >= 0:
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((st / 200) ** 2) * 320), 960, int(((st / 200) ** 2) * 320)))
+			st -= 5
+			px = ipx
+			py = ipy
+
+		pg.display.update()
+		#pg.time.wait(20)
 
 mainMenu(display)
 
