@@ -546,9 +546,15 @@ def mainGame(display):
 		if pg.key.get_pressed()[pg.K_w]:
 			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0] or coyote > 0):
 				if not bottomCol[0] and coyote == 0:
+<<<<<<< HEAD
 					if rightCol[0]:
 						vx = -480 * deltaTime
 					else: vx = 480 * deltaTime
+=======
+					if rightCol[0]: vx = -800 * deltaTime
+					else: vx = 800 * deltaTime
+
+>>>>>>> aea3a7a791a24c94a27ec379e49133ac0f331295
 				vy = -320
 
 			wpressed = True
@@ -557,7 +563,7 @@ def mainGame(display):
 
 		if vy < 512:
 			ama = a
-			if vy > 0 and ((rightCol[0] and rp) or (leftCol[0] and lp)):
+			if vy > 0 and (rightCol[0] or leftCol[0]):
 				vy = 32
 				ama = 0
 				playerState = playerStates["onWall"]
