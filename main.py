@@ -548,7 +548,7 @@ def mainGame(display):
 				if not bottomCol[0] and coyote == 0:
 					if rightCol[0]:
 						vx = -480 * deltaTime
-					else: vx = 8 * deltaTime
+					else: vx = 480 * deltaTime
 				vy = -320
 
 			wpressed = True
