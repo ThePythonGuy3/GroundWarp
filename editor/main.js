@@ -13,7 +13,7 @@ function paint(dim, ctx, x, y, rid = -1){
 	tiles[dim][y][x] = rid;
 
 	let tid = rid - 1;
-	if(rid == 9) tid = 4;
+	if(rid == 9) tid = 5;
 
 	ctx.beginPath();
 	ctx.rect(x * 17, y * 17, 16, 16);
@@ -82,6 +82,12 @@ for(let i = 0; i < 3; i++){
 	images[i].push(image)
 
 	image = new Image();
+	tg = "";
+	if(i > 0) tg = pid[i];
+	image.src = "sprites/extra" + tg + ".png";
+	images[i].push(image)
+
+	image = new Image();
 	image.src = "sprites/begin.png";
 	images[i].push(image)
 }
@@ -99,6 +105,7 @@ window.onload = () => {
 	let v2 = document.getElementById("v2");
 	let v3 = document.getElementById("v3");
 	let v4 = document.getElementById("v4");
+	let v5 = document.getElementById("v5");
 	let v99 = document.getElementById("v99");
 	let lb = document.getElementById("pp");
 	let rng = document.getElementById("rng");
@@ -143,6 +150,11 @@ window.onload = () => {
 		updoot(lb);
 	}
 
+	v5.onclick = () => {
+		id = 5;
+		updoot(lb);
+	}
+
 	v99.onclick = () => {
 		id = 9;
 		updoot(lb);
@@ -161,6 +173,7 @@ window.onload = () => {
 		v2.src = "sprites/block" + tag + "1.png";
 		v3.src = "sprites/block" + tag + "2.png";
 		v4.src = "sprites/spoike" + tag + ".png";
+		v5.src = "sprites/extra" + tag + ".png";
 
 		loadTile(dimens, ctx);
 	}

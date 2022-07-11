@@ -42,18 +42,21 @@ class block:
 
 #0 is empty
 blocks = [
-	block(anim.animator(anim.sprite("block"))),                 #1 ---- A
-	block(anim.animator(anim.split("block1", 6))),              #2
-	block(anim.animator(anim.split("block2", 2), 3)),           #3
-	block(anim.animator(anim.sprite("spoike")), True, True),    #4
-	block(anim.animator(anim.sprite("blockB"))),                #5 ---- B
-	block(anim.animator(anim.sprite("blockB1"))),               #6
-	block(anim.animator(anim.split("blockB2", 9), 2, True)),    #7
-	block(anim.animator(anim.split("spoikeB", 6), 2), True, True), #8
-	block(anim.animator(anim.sprite("blockC"))),                #9 ---- C
-	block(anim.animator(anim.sprite("blockC1"))),               #10
-	block(anim.animator(anim.sprite("blockC2"))),               #11
-	block(anim.animator(anim.sprite("spoikeC")), True, True)    #12
+	block(anim.animator(anim.sprite("block"))),
+	block(anim.animator(anim.split("block1", 6))),
+	block(anim.animator(anim.split("block2", 2), 3)),
+	block(anim.animator(anim.sprite("spoike")), True, True),
+	block(anim.animator(anim.split("bumper", 4), 15, True)),
+	block(anim.animator(anim.sprite("blockB"))),
+	block(anim.animator(anim.sprite("blockB1"))),
+	block(anim.animator(anim.split("blockB2", 9), 2, True)),
+	block(anim.animator(anim.split("spoikeB", 6), 2), True, True),
+	block(anim.animator(anim.split("spoikeB", 6), 2), True, True),
+	block(anim.animator(anim.sprite("blockC"))),
+	block(anim.animator(anim.sprite("blockC1"))),
+	block(anim.animator(anim.sprite("blockC2"))),
+	block(anim.animator(anim.sprite("spoikeC")), True, True),
+	block(anim.animator(anim.sprite("spoikeC")), True, True)
 ]
 
 playerSprites = [
@@ -155,13 +158,13 @@ def loadRoom(name):
 					if v == 9:
 						rx = x
 						ry = y
-					else: tiles[r][(x, y)] = blocks[v - 1 + r * 4].create(colliderList, r, x, y, 0)
+					else: tiles[r][(x, y)] = blocks[v - 1 + r * 5].create(colliderList, r, x, y, 0)
 			x += 1
 
 	for r in range(3):
 		dd = tiles[r].keys()
 		for i in dd:
-			if tiles[r][i].kill:
+			if tiles[r][i].kill or blocks.index(tiles[r][i]) % 5 == 4:
 				bitm[r][i] = 15
 				continue
 
@@ -384,6 +387,7 @@ def updateBlocksBuffer(tiles, dimension, tick):
 		tiles[dimension][i].animator.updateAnimationFrame(tick)
 
 		if tiles[dimension][i].animator.animationCheck():
+			pg.draw.rect(blocksBuffer, (0, 0, 0, 0), (i[0] * 32, i[1] * 32, 32, 32))
 			blocksBuffer.blit(tiles[dimension][i].animator.animate(), (i[0] * 32, i[1] * 32))
 			blocksBuffer.blit(bitmask[bitm[dimension][i]], (i[0] * 32, i[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
 
@@ -517,8 +521,6 @@ def mainGame(display):
 
 		msx, msy = pg.mouse.get_pos()
 
-		print(bottomCol)
-
 		if bottomCol[0]: coyote = 6
 
 		lp = False
@@ -545,7 +547,7 @@ def mainGame(display):
 			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0] or coyote > 0):
 				if not bottomCol[0] and coyote == 0:
 					if rightCol[0]:
-						vx = -8 * deltaTime
+						vx = -480 * deltaTime
 					else: vx = 8 * deltaTime
 				vy = -320
 
@@ -619,7 +621,7 @@ def mainGame(display):
 
 		if int(time() * 2) % 2:
 			if retrigger:
-				print(frame, deltaTime)
+				print(frame)
 				frame = 0
 			retrigger = False
 		else:
