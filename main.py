@@ -97,7 +97,7 @@ mute = [
 	False  #mute music
 ]
 
-backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("forestbg")]
+backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("factorybg")]
 crtag = anim.sprite("creditsTag")
 
 muteButtons = anim.splitCustom("mute-buttons", 3, 24, 24)
@@ -114,12 +114,18 @@ makeB = anim.sprite("make")
 makeBH = anim.sprite("make-hover")
 makeBP = anim.sprite("make-press")
 
+pausedS = anim.sprite("paused")
+
 snek = anim.animator(anim.split("gamesnek", 11), 2)
 snakeask = anim.sprite("snakeask")
 snektext = anim.split("snake", 5)
 snekfx = [pg.mixer.Sound("audio/sfx/snek" + str(i + 1) + ".mp3") for i in range(4)]
 coll = anim.sprite("collider")
 collkill = anim.sprite("colliderkill")
+
+death = pg.mixer.Sound("audio/sfx/death.wav")
+death.set_volume(0.5)
+select = pg.mixer.Sound("audio/sfx/select.wav")
 
 def loadRoom(name):
 	global colliderList, tiles, bitm
@@ -228,8 +234,9 @@ def inOutQuadBlend(t):
 	return 2.0 * t * (1.0 - t) + 0.5
 
 muteButtonsRects = [pg.Rect(0, 640 - 48, 48, 48), pg.Rect(48, 640 - 48, 48, 48)]
+exitButtonRect = pg.Rect(960 // 2 - 64, 640 // 2 - 32, 128, 64)
 
-loops = ["audio/music/loop1.mp3"]
+loops = ["audio/music/loop1.mp3", "audio/music/loop2.mp3"]
 def mainMenu(display):
 	pg.mixer.music.stop()
 	pg.mixer.music.unload()
@@ -303,7 +310,7 @@ def mainMenu(display):
 				choice(snekfx).play()
 
 		for i in range(snakeProg):
-			display.blit(snektext[i], (i * 32 + 2, 640 - 34))
+			display.blit(snektext[i], (960 - 34 * 5 + i * 32 + 2, 640 - 54))
 
 		if not snakeEnable and snangle < 180:
 			snangle += 2
@@ -320,6 +327,7 @@ def mainMenu(display):
 		if playBRect.collidepoint(msx, msy):
 			pbTex = playBH
 			if pressed:
+				select.play()
 				pbTex = playBP
 				running = False
 		blitRotateCenter(display, pbTex, (180) * easeang, (playBRect.x, playBRect.y), 1)
@@ -327,6 +335,7 @@ def mainMenu(display):
 		if makeBRect.collidepoint(msx, msy):
 			mbTex = makeBH
 			if pressed:
+				select.play()
 				mbTex = makeBP
 				openEditor()
 		blitRotateCenter(display, mbTex, (180) * easeang, (makeBRect.x, makeBRect.y), 1)
@@ -334,18 +343,23 @@ def mainMenu(display):
 		if exitBRect.collidepoint(msx, msy):
 			ebTex = exitBH
 			if pressed:
+				select.play()
 				ebTex = exitBP
 				running = False
 				fullR = True
 		blitRotateCenter(display, ebTex, (180) * easeang, (exitBRect.x, exitBRect.y), 1)
 
 		if muteButtonsRects[0].collidepoint(msx, msy):
-			if pressed: mute[0] = not mute[0]
+			if pressed:
+				select.play()
+				mute[0] = not mute[0]
 		blitRotateCenter(display, muteButtons[0], (180) * easeang, (muteButtonsRects[0].x, muteButtonsRects[0].y), 1)
 		if mute[0]: blitRotateCenter(display, muteButtons[2], (180) * easeang, (muteButtonsRects[0].x, muteButtonsRects[0].y), 1)
 
 		if muteButtonsRects[1].collidepoint(msx, msy):
-			if pressed: mute[1] = not mute[1]
+			if pressed:
+				select.play()
+				mute[1] = not mute[1]
 		blitRotateCenter(display, muteButtons[1], (180) * easeang, (muteButtonsRects[1].x, muteButtonsRects[1].y), 1)
 		if mute[1]: blitRotateCenter(display, muteButtons[2], (180) * easeang, (muteButtonsRects[1].x, muteButtonsRects[1].y), 1)
 
@@ -401,7 +415,7 @@ def getPlayerSprite(tick):
 
 	return playerSprites[playerState + playerDirection * 4].animate()
 
-def mainGame(display):
+def mainGame(screen):
 	global colliderList, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
 
 	pg.mixer.music.fadeout(300)
@@ -460,35 +474,40 @@ def mainGame(display):
 
 	updateBackground(dimension)
 
+	display = pg.Surface((960, 640), pg.SRCALPHA, 32)
+	fil = pg.Surface((960, 640))
+	paused = False
+
+	tickK = False
+	tExit = False
 	while running:
-		pressed = False
 		if previousDimension != dimension:
 			previousDimension = dimension
 			generateBlocksBuffer(tiles, dimension, tick)
-			updateBackground(dimension)
 
+		warped = 0
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
+				tExit = True
 
 			if e.type == pg.KEYDOWN:
 				if e.key == pg.K_p:
 					debug = not debug
 
+				if e.key == pg.K_ESCAPE:
+					paused = True
+
 				if e.key == pg.K_RIGHT:
 					dimension += 1
-
+					warped = 1
 				if e.key == pg.K_LEFT:
 					dimension -= 1
-
-			if e.type == pg.MOUSEBUTTONDOWN:
-				if e.button == 1: pressed = True
+					warped = -1
 
 				dimension %= 3
 
 		deltaTime = cock.tick(60) / 1000
-
-		#if deltaTime == 0 or abs(deltaTime) > 5: deltaTime = 1
 
 		topBox.x = px + 6
 		topBox.y = py - 2
@@ -521,8 +540,6 @@ def mainGame(display):
 
 		cols = [topCol, toppestCol, bottomCol, bottomestCol, rightCol, rightestCol, leftCol, leftestCol, killCol]
 
-		msx, msy = pg.mouse.get_pos()
-
 		if bottomCol[0]: coyote = 6
 
 		lp = False
@@ -548,9 +565,9 @@ def mainGame(display):
 		if pg.key.get_pressed()[pg.K_w]:
 			if not wpressed and (bottomCol[0] or rightCol[0] or leftCol[0] or coyote > 0):
 				if not bottomCol[0] and coyote == 0:
-					if rightCol[0]: vx = -800 * deltaTime
-					else: vx = 800 * deltaTime
-
+					if rightCol[0]:
+						vx = -480 * deltaTime
+					else: vx = 480 * deltaTime
 				vy = -320
 
 			wpressed = True
@@ -559,7 +576,7 @@ def mainGame(display):
 
 		if vy < 512:
 			ama = a
-			if vy > 0 and (rightCol[0] or leftCol[0]):
+			if vy > 0 and ((rightCol[0] and rp) or (leftCol[0] and lp)):
 				vy = 32
 				ama = 0
 				playerState = playerStates["onWall"]
@@ -575,6 +592,11 @@ def mainGame(display):
 		if toppestCol[0]: vy = 64
 		if bottomCol[0] and vy > 0: vy = 0
 		if bottomestCol[0]: vy = -64
+
+		if warped != 0:
+			if killCol[0]:
+				dimension -= warped
+				dimension %= 3
 
 		display.fill((255, 255, 255))
 		display.blit(bg, (0, 0))
@@ -606,15 +628,39 @@ def mainGame(display):
 
 		pg.mixer.music.set_volume(not mute[0])
 
-		if muteButtonsRects[0].collidepoint(msx, msy):
-			if pressed: mute[0] = not mute[0]
-		display.blit(muteButtons[0], (muteButtonsRects[0].x, muteButtonsRects[0].y))
-		if mute[0]: display.blit(muteButtons[2], (muteButtonsRects[0].x, muteButtonsRects[0].y))
+		if killCol[0] and killCol[1] or tickK:
+			if not tickK:
+				death.play()
+				vx = 0
+				vy = 0
+				dimension = 0
+				screen.blit(display, (0, 0))
+				for i in range(40):
+					pg.event.get()
+					cock.tick(60)
+					screen.blit(display, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+					pg.display.update()
+					pg.time.delay(5)
 
-		if muteButtonsRects[1].collidepoint(msx, msy):
-			if pressed: mute[1] = not mute[1]
-		display.blit(muteButtons[1], (muteButtonsRects[1].x, muteButtonsRects[1].y))
-		if mute[1]: display.blit(muteButtons[2], (muteButtonsRects[1].x, muteButtonsRects[1].y))
+				pg.draw.rect(screen, (0, 0, 0), (0, 0, 960, 640))
+
+				px = ipx
+				py = ipy
+
+			tickK = not tickK
+
+			if not tickK:
+				#screen.blit(display, (0, 0))
+				surff = pg.Surface((960, 640))
+				for i in range(39):
+					pg.event.get()
+					cock.tick(60)
+					surff.fill((0, 0, 0))
+					pg.draw.circle(surff, (255, 255, 255), (px, py), i * 30)
+					screen.blit(display, (0, 0))
+					screen.blit(surff, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+					pg.display.update()
+					pg.time.delay(1)
 
 		px += vx
 		py += vy * deltaTime
@@ -641,8 +687,80 @@ def mainGame(display):
 			px = ipx
 			py = ipy
 
+		if not tickK: screen.blit(display, (0, 0))
 		pg.display.update()
-		#pg.time.wait(20)
+
+		if paused:
+			inRun = True
+			while inRun:
+				pressed = False
+
+				for e in pg.event.get():
+					if e.type == pg.QUIT:
+						inRun = running = False
+						tExit = True
+
+					if e.type == pg.KEYDOWN:
+						if e.key == pg.K_ESCAPE:
+							inRun = False
+
+					if e.type == pg.MOUSEBUTTONDOWN:
+						if e.button == 1: pressed = True
+
+				msx, msy = pg.mouse.get_pos()
+
+				pg.mixer.music.set_volume((not mute[0]) * 0.2)
+
+				cock.tick(60)
+
+				screen.blit(display, (0, 0))
+				pg.draw.rect(fil, (125, 125, 125), (0, 0, 960, 640))
+				screen.blit(fil, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+
+				if muteButtonsRects[0].collidepoint(msx, msy):
+					if pressed:
+						select.play()
+						mute[0] = not mute[0]
+				screen.blit(muteButtons[0], (muteButtonsRects[0].x, muteButtonsRects[0].y))
+				if mute[0]: screen.blit(muteButtons[2], (muteButtonsRects[0].x, muteButtonsRects[0].y))
+
+				if muteButtonsRects[1].collidepoint(msx, msy):
+					if pressed:
+						select.play()
+						mute[1] = not mute[1]
+				screen.blit(muteButtons[1], (muteButtonsRects[1].x, muteButtonsRects[1].y))
+				if mute[1]: screen.blit(muteButtons[2], (muteButtonsRects[1].x, muteButtonsRects[1].y))
+
+				ebTex = exitB
+				if exitButtonRect.collidepoint(msx, msy):
+					ebTex = exitBH
+					if pressed:
+						select.play()
+						ebTex = exitBP
+						inRun = running = False
+				screen.blit(ebTex, (exitButtonRect.x, exitButtonRect.y))
+
+				screen.blit(pausedS, (960 // 2 - 96, 50))
+
+				pg.display.update()
+
+			pg.mixer.music.set_volume(not mute[0])
+
+		paused = False
+
+	if not tExit:
+		pg.mixer.music.fadeout(300)
+		for i in range(211):
+			pg.event.get()
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((i / 200) ** 2) * 320)))
+			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((i / 200) ** 2) * 320), 960, int(((i / 200) ** 2) * 320)))
+			screen.blit(display, (0, 0))
+			pg.display.update()
+			pg.time.delay(5)
+
+		pg.time.delay(1000)
+		mainMenu(screen)
+
 
 mainMenu(display)
 
