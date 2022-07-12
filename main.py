@@ -267,6 +267,9 @@ def mainMenu(display):
 	snangle = 0
 
 	while running:
+		death.set_volume(not mute[1] * 0.5)
+		select.set_volume(not mute[1] * 0.5)
+
 		pressed = False
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
@@ -416,7 +419,7 @@ def getPlayerSprite(tick):
 	return playerSprites[playerState + playerDirection * 4].animate()
 
 def mainGame(screen):
-	global colliderList, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
+	global colliderList, bg, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
 
 	pg.mixer.music.fadeout(300)
 	pg.mixer.music.load(choice(loops))
@@ -481,9 +484,13 @@ def mainGame(screen):
 	tickK = False
 	tExit = False
 	while running:
+		death.set_volume(not mute[1] * 0.5)
+		select.set_volume(not mute[1] * 0.5)
+
 		if previousDimension != dimension:
 			previousDimension = dimension
 			generateBlocksBuffer(tiles, dimension, tick)
+			updateBackground(dimension)
 
 		warped = 0
 		for e in pg.event.get():
@@ -597,6 +604,7 @@ def mainGame(screen):
 			if killCol[0]:
 				dimension -= warped
 				dimension %= 3
+
 
 		display.fill((255, 255, 255))
 		display.blit(bg, (0, 0))
