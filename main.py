@@ -97,7 +97,7 @@ mute = [
 	False  #mute music
 ]
 
-backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("factorybg")]
+backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("forestbg")]
 crtag = anim.sprite("creditsTag")
 
 muteButtons = anim.splitCustom("mute-buttons", 3, 24, 24)
@@ -465,6 +465,7 @@ def mainGame(display):
 		if previousDimension != dimension:
 			previousDimension = dimension
 			generateBlocksBuffer(tiles, dimension, tick)
+			updateBackground(dimension)
 
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
@@ -476,6 +477,7 @@ def mainGame(display):
 
 				if e.key == pg.K_RIGHT:
 					dimension += 1
+
 				if e.key == pg.K_LEFT:
 					dimension -= 1
 
