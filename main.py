@@ -97,7 +97,7 @@ mute = [
 	False  #mute music
 ]
 
-backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("factorybg")]
+backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("forestbg")]
 crtag = anim.sprite("creditsTag")
 
 muteButtons = anim.splitCustom("mute-buttons", 3, 24, 24)
