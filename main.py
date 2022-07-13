@@ -524,6 +524,11 @@ def dimensionTransition(screen, current, shadows, dimension, px, py):
 
 	cock.tick(60)
 
+def blitCenter(blitted, blitter, x, y):
+	x = x - blitter.get_width() // 2
+	y = y - blitter.get_height() // 2
+	blitted.blit(blitter, (x, y))
+
 def mainGame(screen):
 	global colliderList, bg, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
 
@@ -810,9 +815,14 @@ def mainGame(screen):
 			display.blit(uiFont.render("There's one per level.", True, (255, 255, 255)), (22 * 32 + 20 - 8, 11 * 32 + 20))
 			display.blit(uiFont.render("Try to collect them all!", True, (255, 255, 255)), (22 * 32 + 19 - 8, 11 * 32 + 40))
 
-		display.blit(level, (0, 0))
-		display.blit(uiFont.render(f"Level {currentRoom + 1}", True, (255, 255, 255)), (6, 6))
-		display.blit(uiFont.render(f"Strawberries: {stroberies}", True, (255, 255, 255)), (6, 26))
+		if currentRoom != (len(roomNames) - 1):
+			display.blit(level, (0, 0))
+			display.blit(uiFont.render(f"Level {currentRoom + 1}", True, (255, 255, 255)), (6, 6))
+			display.blit(uiFont.render(f"Strawberries: {stroberies}", True, (255, 255, 255)), (6, 26))
+		else:
+			display.blit(uiFont.render("This is a strawberry.", True, (255, 255, 255)), (22 * 32 + 24 - 8, 11 * 32))
+			display.blit(uiFont.render("There's one per level.", True, (255, 255, 255)), (22 * 32 + 20 - 8, 11 * 32 + 20))
+			display.blit(uiFont.render("Try to collect them all!", True, (255, 255, 255)), (22 * 32 + 19 - 8, 11 * 32 + 40))
 
 		if debug:
 			for i in colliderList[dimension]:
