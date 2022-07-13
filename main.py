@@ -643,7 +643,7 @@ def mainGame(screen):
 		previousVy = vy
 
 		warped = 0
-		reset = True
+		reset = False
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
