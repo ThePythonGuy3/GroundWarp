@@ -75,7 +75,7 @@ blocks = [
 	block(anim.animator(anim.sprite("blockC1"))),
 	block(anim.animator(anim.sprite("blockC2"))),
 	block(anim.animator(anim.sprite("spoikeC")), True, True),
-	block(anim.animator(anim.sprite("spoikeC")), True, True)
+	block(anim.animator(anim.sprite("blockC3")), True, True)
 ]
 
 playerSprites = [
@@ -462,7 +462,10 @@ def mainGame(screen):
 	tickF = tick = 0
 	deltaTime = 1
 
-	px, py, sh = loadRoom("room1")
+	roomNames = os.listdir("rooms")
+
+	currentRoom = 0
+	px, py, sh = loadRoom(roomNames[0])
 	px *= 32
 	py *= 32
 	ipx = px
@@ -725,6 +728,26 @@ def mainGame(screen):
 
 		px += vx
 		py += vy * deltaTime
+
+		if px >= 955:
+			for i in range(38, -1, -1):
+				pg.event.get()
+				cock.tick(60)
+				surff.fill((0, 0, 0))
+				pg.draw.circle(surff, (255, 255, 255), (px, py), i * 30)
+				screen.blit(display, (0, 0))
+				screen.blit(surff, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+				pg.display.update()
+				pg.time.delay(3)
+
+			currentRoom += 1
+			dimension = 0
+			px, py, sh = loadRoom(roomNames[currentRoom])
+			tickK = True
+			px *= 32
+			py *= 32
+			ipx = px
+			ipy = py
 
 		vx *= 0.8
 
