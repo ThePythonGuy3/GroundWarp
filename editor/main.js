@@ -32,7 +32,7 @@ function loadTile(dim, ctx){
 	for(let i = 0; i < 30; i++){
 		for(let j = 0; j < 20; j++){
 			let rid = tiles[dim][j][i];
-			if(rid == 9) rid = 5;
+			if(rid == 9) rid = 6;
 
 			ctx.beginPath();
 			ctx.rect(i * 17, j * 17, 16, 16);
