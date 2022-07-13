@@ -153,8 +153,6 @@ snek = anim.animator(anim.split("gamesnek", 11), 2)
 snakeask = anim.sprite("snakeask")
 snektext = anim.split("snake", 5)
 snekfx = [pg.mixer.Sound("audio/sfx/snek" + str(i + 1) + ".mp3") for i in range(4)]
-coll = anim.sprite("collider")
-collkill = anim.sprite("colliderkill")
 
 death = pg.mixer.Sound("audio/sfx/death.wav")
 select = pg.mixer.Sound("audio/sfx/select.wav")
