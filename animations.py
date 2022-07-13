@@ -10,6 +10,9 @@ class animator:
 		self.currentAnimationFrame = -1
 		self.animated = (type(self.sprites) == list)
 
+	def copy(self):
+		return animator(self.sprites, self.speed, self.pingpong)
+
 	def updateAnimationFrame(self, tick):
 		if self.animated:
 			self.currentAnimationFrame = int((tick / 60) * self.speed * pi) % len(self.sprites)

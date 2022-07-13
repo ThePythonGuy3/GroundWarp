@@ -29,35 +29,44 @@ class updater:
 		self.typ = typ
 
 class block:
-	def __init__(self, animator, kill = False, half = False, spikeGrow = False):
+	def __init__(self, animator, kill = False, half = False, spikeGrow = False, impulse = 0):
 		self.animator = animator
 		self.kill = kill
 		self.half = half
 		self.spikeGrow = spikeGrow
+		self.impulse = impulse
+
+	def copy(self):
+		return block(self.animator.copy(), self.kill, self.half, self.spikeGrow, self.impulse)
 
 	def create(self, colliderList, dimension, tilex, tiley, rotation): # Rotation goes in 0-3 format, 0 being upwards and going clockwise
+		blocc = self
+		if self.impulse != 0:
+			blocc = self.copy()
+			blocc.animator.currentAnimationFrame = 0
+
 		if self.half:
 			for i in range(2):
-				if rotation == 0: colliderList[dimension].append(col.collider(tilex * 2 + i, tiley * 2 + 1, self.kill))
-				if rotation == 1: colliderList[dimension].append(col.collider(tilex * 2, tiley * 2 + i, self.kill))
-				if rotation == 2: colliderList[dimension].append(col.collider(tilex * 2 + i, tiley * 2, self.kill))
-				if rotation == 3: colliderList[dimension].append(col.collider(tilex * 2 + 1, tiley * 2 + i, self.kill))
+				if rotation == 0: colliderList[dimension].append(col.collider(blocc, tilex * 2 + i, tiley * 2 + 1, self.kill, impulse = self.impulse))
+				if rotation == 1: colliderList[dimension].append(col.collider(blocc, tilex * 2, tiley * 2 + i, self.kill, impulse = self.impulse))
+				if rotation == 2: colliderList[dimension].append(col.collider(blocc, tilex * 2 + i, tiley * 2, self.kill, impulse = self.impulse))
+				if rotation == 3: colliderList[dimension].append(col.collider(blocc, tilex * 2 + 1, tiley * 2 + i, self.kill, impulse = self.impulse))
 		else:
-			colliderList[dimension].append(col.collider(tilex * 2, tiley * 2, self.kill, 32))
+			colliderList[dimension].append(col.collider(blocc, tilex * 2, tiley * 2, self.kill, 32, self.impulse))
 
 		if self.spikeGrow:
 			def runner(data):
 				if self.animator.currentAnimationFrame == 2:
 					if len(data[0][dimension]):
-						data[0][dimension].append(col.collider(tilex * 2, tiley * 2, True))
-						data[0][dimension].append(col.collider(tilex * 2 + 1, tiley * 2, True))
+						data[0][dimension].append(col.collider(blocc, tilex * 2, tiley * 2, True))
+						data[0][dimension].append(col.collider(blocc, tilex * 2 + 1, tiley * 2, True))
 				elif self.animator.currentAnimationFrame == 7:
 					while len(data[0][dimension]) > data[1][dimension]:
 						data[0][dimension].pop()
 
 			updaters[dimension].append(updater(runner, "spooke"))
 
-		return self
+		return blocc
 
 #0 is empty
 blocks = [
@@ -65,7 +74,7 @@ blocks = [
 	block(anim.animator(anim.split("block1", 6))),
 	block(anim.animator(anim.split("block2", 2), 3)),
 	block(anim.animator(anim.sprite("spoike")), True, True),
-	block(anim.animator(anim.split("bumper", 4), 15, True)),
+	block(anim.animator(anim.split("bumper", 4), 15, True), half = True, impulse = -512),
 	block(anim.animator(anim.sprite("blockB"))),
 	block(anim.animator(anim.sprite("blockB1"))),
 	block(anim.animator(anim.split("blockB2", 9), 2, True)),
@@ -111,10 +120,11 @@ colliderList = [[], [], []] # Dimensions A, B, C
 tiles = [{}, {}, {}]
 bitm = [{}, {}, {}]
 updaters = [[], [], []]
+impulseAnimators = []
 
 mute = [
-	False, #mute sound
-	False  #mute music
+	False, # Mute music
+	False  # Mute sfx
 ]
 
 pg.font.init()
@@ -196,7 +206,7 @@ def loadRoom(name):
 	for r in range(3):
 		dd = tiles[r].keys()
 		for i in dd:
-			if tiles[r][i].kill or blocks.index(tiles[r][i]) % 5 == 4:
+			if tiles[r][i].kill:
 				bitm[r][i] = 15
 				continue
 
@@ -432,7 +442,7 @@ def generateBlocksBuffer(tiles, dimension, tick):
 def updateBlocksBuffer(tiles, dimension, tick):
 	global blocksBuffer
 	for i in tiles[dimension].keys():
-		tiles[dimension][i].animator.updateAnimationFrame(tick)
+		if tiles[dimension][i].impulse == 0: tiles[dimension][i].animator.updateAnimationFrame(tick)
 
 		if tiles[dimension][i].animator.animationCheck():
 			pg.draw.rect(blocksBuffer, (0, 0, 0, 0), (i[0] * 32, i[1] * 32, 32, 32))
@@ -518,6 +528,8 @@ def mainGame(screen):
 	display = pg.Surface((960, 640), pg.SRCALPHA, 32)
 	fil = pg.Surface((960, 640))
 	paused = False
+
+	impulseQueue = {}
 
 	tickK = True
 	ftk = True
@@ -698,7 +710,18 @@ def mainGame(screen):
 			else: screenOffSet[0] = -1.5 * screenShakeTime
 			screenShakeTime -= 1
 
-		if killCol[0] and killCol[1] or tickK:
+		if killCol[0] and killCol[2] != 0:
+			vy = killCol[2]
+			impulseQueue[killCol[4]] = [killCol[3], 4]
+
+		for i in impulseQueue.keys():
+			if impulseQueue[i][1] < 0:
+				continue
+
+			impulseQueue[i][0].animator.updateAnimationFrame(int(impulseQueue[i][1]))
+			impulseQueue[i][1] -= 10 * deltaTime
+
+		if (killCol[0] and killCol[1]) or tickK:
 			if not tickK:
 				death.play()
 				vx = 0
@@ -753,6 +776,7 @@ def mainGame(screen):
 				pg.time.delay(3)
 
 			currentRoom += 1
+			impulseQueue = {}
 			if currentRoom == len(roomNames):
 				running = False
 				ended = True
