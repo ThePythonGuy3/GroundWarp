@@ -545,6 +545,7 @@ def mainGame(screen):
 	tExit = False
 	ended = False
 	stroberies = 0
+	deviceAcquired = False
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
@@ -559,11 +560,6 @@ def mainGame(screen):
 		previousVx = vx
 		previousVy = vy
 
-		if previousDimension != dimension:
-			previousDimension = dimension
-			generateBlocksBuffer(tiles, dimension, tick)
-			updateBackground(dimension)
-
 		warped = 0
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
@@ -577,12 +573,13 @@ def mainGame(screen):
 				if e.key == pg.K_ESCAPE:
 					paused = True
 
-				if e.key == pg.K_RIGHT:
-					dimension += 1
-					warped = 1
-				if e.key == pg.K_LEFT:
-					dimension -= 1
-					warped = -1
+				if deviceAcquired:
+					if e.key == pg.K_RIGHT:
+						dimension += 1
+						warped = 1
+					if e.key == pg.K_LEFT:
+						dimension -= 1
+						warped = -1
 
 				if e.key == pg.K_h:
 					systime = datetime.now()
@@ -685,8 +682,23 @@ def mainGame(screen):
 				vy = previousVy
 				screenShakeTime = 6
 				warpFail.play()
-			else: warp.play()
+			else:
+				"""for i in range(38, -1, -1):
+					pg.event.get()
+					cock.tick(60)
+					surff.fill((0, 0, 0))
+					pg.draw.circle(surff, (255, 255, 255), (px, py), i * 30)
+					screen.blit(display, screenOffSet)
+					screen.blit(surff, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+					pg.display.update()
+					pg.time.delay(1)
+				tickK = True"""
+				warp.play()
 
+		if previousDimension != dimension:
+			previousDimension = dimension
+			generateBlocksBuffer(tiles, dimension, tick)
+			updateBackground(dimension)
 
 		display.fill((255, 255, 255))
 		display.blit(bg, (0, 0))
@@ -831,7 +843,7 @@ def mainGame(screen):
 			px = ipx
 			py = ipy"""
 
-		if not tickK: screen.blit(display, screenOffSet)
+		if (not tickK) or warped: screen.blit(display, screenOffSet)
 		if running: pg.display.update()
 
 		if paused:
