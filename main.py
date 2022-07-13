@@ -63,6 +63,7 @@ class block:
 						data[0][dimension].append(col.collider(blocc, tilex * 2 + 1, tiley * 2, True))
 				elif self.animator.currentAnimationFrame == 7:
 					while len(data[0][dimension]) > data[1][dimension]:
+						print(len(data[0][dimension]), data[1][dimension])
 						data[0][dimension].pop()
 
 			updaters[dimension].append(updater(runner, "spooke"))
@@ -820,7 +821,7 @@ def mainGame(screen):
 			display.blit(uiFont.render(f"Level {currentRoom + 1}", True, (255, 255, 255)), (6, 6))
 			display.blit(uiFont.render(f"Strawberries: {stroberies}", True, (255, 255, 255)), (6, 26))
 		else:
-			display.blit(uiFont.render("This is a strawberry.", True, (255, 255, 255)), (22 * 32 + 24 - 8, 11 * 32))
+			blitCenter(display, uiFont.render("This is a strawberry.", True, (255, 255, 255)), 22 * 32 + 20 - 8, 11 * 32 + 20)
 			display.blit(uiFont.render("There's one per level.", True, (255, 255, 255)), (22 * 32 + 20 - 8, 11 * 32 + 20))
 			display.blit(uiFont.render("Try to collect them all!", True, (255, 255, 255)), (22 * 32 + 19 - 8, 11 * 32 + 40))
 
@@ -945,6 +946,7 @@ def mainGame(screen):
 				py *= 32
 				ipx = px
 				ipy = py
+				defaultColliderLen = [len(colliderList[i]) for i in range(3)]
 				generateBlocksBuffer(tiles, dimension, tick)
 
 		vx *= 0.8
