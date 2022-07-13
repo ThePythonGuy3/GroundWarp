@@ -288,7 +288,7 @@ def inOutQuadBlend(t):
 muteButtonsRects = [pg.Rect(0, 640 - 48, 48, 48), pg.Rect(48, 640 - 48, 48, 48)]
 exitButtonRect = pg.Rect(960 // 2 - 64, 640 // 2 - 32, 128, 64)
 
-loops = ["audio/music/loop1.mp3", "audio/music/loop2.mp3"]
+loops = ["audio/music/loop1.mp3", "audio/music/loop2.mp3", "audio/music/won.mp3"]
 def mainMenu(display):
 	pg.mixer.music.stop()
 	pg.mixer.music.unload()
@@ -771,7 +771,10 @@ def mainGame(screen):
 			updateBackground(dimension)
 
 		display.fill((255, 255, 255))
-		display.blit(bg, (0, 0))
+		if dimension == 2:
+			display.blit(bg, ((tick / 2) % 960, 0))
+			display.blit(bg, ((tick / 2) % 960 - 960, 0))
+		else: display.blit(bg, (0, 0))
 		mainSurf.fill((0, 0, 0, 0))
 
 		if enableShadow:
@@ -897,7 +900,7 @@ def mainGame(screen):
 			currentRoom += 1
 			if currentRoom != len(roomNames): nextLevel.play()
 
-			if currentRoom >= len(roomNames) // 2:
+			if currentRoom == len(roomNames) // 2:
 				pg.mixer.music.fadeout(300)
 				pg.mixer.music.unload()
 				pg.mixer.music.load(loops[1])
@@ -919,6 +922,13 @@ def mainGame(screen):
 				ended = True
 			else:
 				dimension = 0
+				if currentRoom == (len(roomNames) - 1):
+					dimension = 2
+					deviceAcquired = False
+					pg.mixer.music.fadeout(300)
+					pg.mixer.music.unload()
+					pg.mixer.music.load(loops[2])
+					pg.mixer.music.play(loops=-1, fade_ms=300)
 				px, py, sh = loadRoom(roomNames[currentRoom])
 				tickK = True
 				px *= 32
