@@ -1061,9 +1061,10 @@ def mainGame(screen):
 				screen.blit(controlsFont.render("ESC = Pause/Unpause", True, (255, 255, 255)), (16, 16))
 				screen.blit(controlsFont.render("W, A, D = Movement", True, (255, 255, 255)), (16, 48))
 				screen.blit(controlsFont.render("C = Screenshot", True, (255, 255, 255)), (16, 80))
+				screen.blit(controlsFont.render("R = Restart", True, (255, 255, 255)), (16, 112))
 				if deviceAcquired:
-					screen.blit(controlsFont.render("Left, Right = Dimension Warp", True, (255, 255, 255)), (16, 112))
-					screen.blit(controlsFont.render("H = Dimension Preview", True, (255, 255, 255)), (16, 144))
+					screen.blit(controlsFont.render("Left, Right = Dimension Warp", True, (255, 255, 255)), (16, 144))
+					screen.blit(controlsFont.render("H = Dimension Preview", True, (255, 255, 255)), (16, 176))
 					
 				pg.display.update()
 
