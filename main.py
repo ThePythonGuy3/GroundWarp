@@ -97,6 +97,9 @@ mute = [
 	False  #mute music
 ]
 
+pg.font.init()
+consolas = pg.font.SysFont("consolas", 23)
+
 backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("forestbg")]
 crtag = anim.sprite("creditsTag")
 
@@ -126,6 +129,8 @@ collkill = anim.sprite("colliderkill")
 death = pg.mixer.Sound("audio/sfx/death.wav")
 death.set_volume(0.5)
 select = pg.mixer.Sound("audio/sfx/select.wav")
+
+currentLevel = 0
 
 def loadRoom(name):
 	global colliderList, tiles, bitm
@@ -487,6 +492,9 @@ def mainGame(screen):
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
 
+		previousVx = vx
+		previousVy = vy
+
 		if previousDimension != dimension:
 			previousDimension = dimension
 			generateBlocksBuffer(tiles, dimension, tick)
@@ -604,6 +612,8 @@ def mainGame(screen):
 			if killCol[0]:
 				dimension -= warped
 				dimension %= 3
+				vx = previousVx
+				vy = previousVy
 
 
 		display.fill((255, 255, 255))
@@ -749,6 +759,9 @@ def mainGame(screen):
 				screen.blit(ebTex, (exitButtonRect.x, exitButtonRect.y))
 
 				screen.blit(pausedS, (960 // 2 - 96, 50))
+
+				screen.blit(consolas.render("ESC = pause/unpause", True, (255, 255, 255)), (16, 16))
+				screen.blit(consolas.render("W, A, D = movement", True, (255, 255, 255)), (20, 48))
 
 				pg.display.update()
 
