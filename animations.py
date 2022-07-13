@@ -26,6 +26,10 @@ class animator:
 		if not self.animated: return self.sprites
 		return self.sprites[self.currentAnimationFrame]
 
+	def getFirstFrame(self):
+		if self.animated: return self.sprites[0]
+		else: return self.sprites
+
 def split(name, n):
 	img = pg.image.load("sprites/" + name + ".png")
 	output = []
