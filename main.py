@@ -519,6 +519,7 @@ def mainGame(screen):
 	tickK = True
 	ftk = True
 	tExit = False
+	ended = False
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
@@ -669,7 +670,6 @@ def mainGame(screen):
 
 		mainSurf.blit(shad, (px, py + 8), special_flags=pg.BLEND_RGBA_MULT)
 
-		#display.blit(glow, (px - 32, py - 32))
 		display.blit(mainSurf, (0, 0))
 		display.blit(getPlayerSprite(tick), (px, py - 16))
 		if not debug: display.blit(sh[dimension], (0, 0))
@@ -729,7 +729,7 @@ def mainGame(screen):
 		px += vx
 		py += vy * deltaTime
 
-		if px >= 955:
+		if px >= 940:
 			for i in range(38, -1, -1):
 				pg.event.get()
 				cock.tick(60)
@@ -741,13 +741,17 @@ def mainGame(screen):
 				pg.time.delay(3)
 
 			currentRoom += 1
-			dimension = 0
-			px, py, sh = loadRoom(roomNames[currentRoom])
-			tickK = True
-			px *= 32
-			py *= 32
-			ipx = px
-			ipy = py
+			if currentRoom == len(roomNames):
+				running = False
+				ended = True
+			else:
+				dimension = 0
+				px, py, sh = loadRoom(roomNames[currentRoom])
+				tickK = True
+				px *= 32
+				py *= 32
+				ipx = px
+				ipy = py
 
 		vx *= 0.8
 
@@ -772,7 +776,7 @@ def mainGame(screen):
 			py = ipy"""
 
 		if not tickK: screen.blit(display, (0, 0))
-		pg.display.update()
+		if running: pg.display.update()
 
 		if paused:
 			inRun = True
@@ -840,13 +844,14 @@ def mainGame(screen):
 
 	if not tExit:
 		pg.mixer.music.fadeout(300)
-		for i in range(211):
-			pg.event.get()
-			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((i / 200) ** 2) * 320)))
-			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((i / 200) ** 2) * 320), 960, int(((i / 200) ** 2) * 320)))
-			screen.blit(display, (0, 0))
-			pg.display.update()
-			pg.time.delay(5)
+		if not ended:
+			for i in range(211):
+				pg.event.get()
+				pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((i / 200) ** 2) * 320)))
+				pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((i / 200) ** 2) * 320), 960, int(((i / 200) ** 2) * 320)))
+				screen.blit(display, (0, 0))
+				pg.display.update()
+				pg.time.delay(5)
 
 		pg.time.delay(1000)
 		mainMenu(screen)
