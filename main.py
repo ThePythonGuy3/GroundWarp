@@ -98,7 +98,7 @@ mute = [
 ]
 
 pg.font.init()
-consolas = pg.font.SysFont("consolas", 23)
+controlsFont = pg.font.SysFont("twcen", 24)
 
 backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("forestbg")]
 crtag = anim.sprite("creditsTag")
@@ -760,8 +760,8 @@ def mainGame(screen):
 
 				screen.blit(pausedS, (960 // 2 - 96, 50))
 
-				screen.blit(consolas.render("ESC = pause/unpause", True, (255, 255, 255)), (16, 16))
-				screen.blit(consolas.render("W, A, D = movement", True, (255, 255, 255)), (20, 48))
+				screen.blit(controlsFont.render("ESC = pause/unpause", True, (255, 255, 255)), (16, 16))
+				screen.blit(controlsFont.render("W, A, D = movement", True, (255, 255, 255)), (16, 48))
 
 				pg.display.update()
 
