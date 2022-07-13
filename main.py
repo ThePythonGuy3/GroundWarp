@@ -131,6 +131,7 @@ mute = [
 
 pg.font.init()
 controlsFont = pg.font.SysFont("twcen", 24)
+uiFont = pg.font.SysFont("twcen", 20)
 
 backgrounds = [anim.sprite("factorybg"), anim.sprite("organicbg"), anim.sprite("forestbg")]
 crtag = anim.sprite("creditsTag")
@@ -161,8 +162,12 @@ select = pg.mixer.Sound("audio/sfx/select.wav")
 warpFail = pg.mixer.Sound("audio/sfx/warpFail.wav")
 warp = pg.mixer.Sound("audio/sfx/warp.wav")
 strawberrySound = pg.mixer.Sound("audio/sfx/strawberry.wav")
+deviceSound = pg.mixer.Sound("audio/sfx/device.wav")
+bumperSound = pg.mixer.Sound("audio/sfx/bumper.wav")
 
 devicetm = anim.split("device", 2)
+
+level = anim.sprite("level")
 
 currentLevel = 0
 
@@ -210,7 +215,7 @@ def loadRoom(name):
 						if v == 3 and r == 2:
 							if ni - 31 > 0 and ni - 31 < len(n[r]):
 								vv = int(n[r][ni - 31])
-								if vv == 0 or (vv > 3 and vv != 5): blocksel = blocks[-1]
+								if vv != 3 and vv != 5: blocksel = blocks[-1]
 						tiles[r][(x, y)] = blocksel.create(colliderList, r, x, y, 0)
 			ni += 1
 			x += 1
@@ -556,6 +561,8 @@ def mainGame(screen):
 		warpFail.set_volume(not mute[1] * 0.7)
 		warp.set_volume(not mute[1] * 0.7)
 		strawberrySound.set_volume(not mute[1] * 0.7)
+		deviceSound.set_volume(not mute[1] * 0.7)
+		bumperSound.set_volume(not mute[1] * 0.5)
 
 		for i in updaters[dimension]:
 			if i.typ == "spooke":
@@ -615,6 +622,7 @@ def mainGame(screen):
 
 		if not deviceAcquired and dimension == 0 and currentRoom == 0 and killBox.colliderect(deviceRect):
 			deviceAcquired = True
+			deviceSound.play()
 
 		rightCol = col.rectCollide(colliderList[dimension], rightBox, True)
 		rightestCol = col.rectCollide(colliderList[dimension], rightestBox, True)
@@ -727,6 +735,27 @@ def mainGame(screen):
 		display.blit(getPlayerSprite(tick), (px, py - 16))
 		if not debug: display.blit(sh[dimension], (0, 0))
 
+		if dimension == 0 and currentRoom == 0:
+			display.blit(uiFont.render("Use A, D to move, W to jump.", True, (255, 255, 255)), (7 * 32, 2 * 32))
+			display.blit(uiFont.render("Hold A/D against walls to fall slower.", True, (255, 255, 255)), (5 * 32 + 28, 2 * 32 + 24))
+			display.blit(uiFont.render("Jump while holding against walls to perform a walljump.", True, (255, 255, 255)), (3 * 32 + 18, 2 * 32 + 48))
+
+			if deviceAcquired:
+				display.blit(uiFont.render("You acquired The Device™!", True, (255, 255, 255)), (19 * 32, 12 * 32))
+				display.blit(uiFont.render("Use Left and Right to warp dimensions.", True, (255, 255, 255)), (17 * 32 + 20, 12 * 32 + 24))
+				display.blit(uiFont.render("Press H to preview all three dimensions.", True, (255, 255, 255)), (17 * 32 + 18, 12 * 32 + 48))
+			else:
+				display.blit(uiFont.render("Grab this.", True, (255, 255, 255)), (24 * 32 + 8, 17 * 32))
+
+		if dimension == 2 and currentRoom == 0 and stroberies == 0:
+			display.blit(uiFont.render("This is a strawberry.", True, (255, 255, 255)), (22 * 32 + 24 - 8, 11 * 32))
+			display.blit(uiFont.render("There's one per level.", True, (255, 255, 255)), (22 * 32 + 20 - 8, 11 * 32 + 20))
+			display.blit(uiFont.render("Try to collect them all!", True, (255, 255, 255)), (22 * 32 + 19 - 8, 11 * 32 + 40))
+
+		display.blit(level, (0, 0))
+		display.blit(uiFont.render(f"Level {currentRoom + 1}", True, (255, 255, 255)), (6, 6))
+		display.blit(uiFont.render(f"Strawberries: {stroberies}", True, (255, 255, 255)), (6, 26))
+
 		if debug:
 			for i in colliderList[dimension]:
 				color = (120, 240, 112)
@@ -748,6 +777,7 @@ def mainGame(screen):
 
 		if killCol[0]:
 			if killCol[2] != 0:
+				bumperSound.play()
 				vy = killCol[2]
 				impulseQueue[killCol[4]] = [killCol[3], 4]
 			if killCol[5] != None:
@@ -913,8 +943,9 @@ def mainGame(screen):
 
 				screen.blit(pausedS, (960 // 2 - 96, 50))
 
-				screen.blit(controlsFont.render("ESC = pause/unpause", True, (255, 255, 255)), (16, 16))
-				screen.blit(controlsFont.render("W, A, D = movement", True, (255, 255, 255)), (16, 48))
+				screen.blit(controlsFont.render("ESC = Pause/Unpause", True, (255, 255, 255)), (16, 16))
+				screen.blit(controlsFont.render("W, A, D = Movement", True, (255, 255, 255)), (16, 48))
+				if deviceAcquired: screen.blit(controlsFont.render("Left, Right = Dimension Warp", True, (255, 255, 255)), (16, 80))
 
 				pg.display.update()
 
