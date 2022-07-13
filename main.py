@@ -297,6 +297,11 @@ def mainMenu(display):
 			if e.type == pg.MOUSEBUTTONDOWN:
 				if e.button == 1: pressed = True
 
+			if e.type == pg.KEYDOWN:
+				if e.key == pg.K_h:
+					systime = datetime.now()
+					pg.image.save(display, "screenshots/screenshot-" + str(systime.strftime("%Y-%m-%d-%H-%M-%S")) + ".png")
+
 		deltaTime = cock.tick(60)
 
 		msx, msy = pg.mouse.get_pos()
@@ -726,6 +731,9 @@ def mainGame(screen):
 					if e.type == pg.KEYDOWN:
 						if e.key == pg.K_ESCAPE:
 							inRun = False
+						if e.key == pg.K_h:
+							systime = datetime.now()
+							pg.image.save(display, "screenshots/screenshot-" + str(systime.strftime("%Y-%m-%d-%H-%M-%S")) + ".png")
 
 					if e.type == pg.MOUSEBUTTONDOWN:
 						if e.button == 1: pressed = True
