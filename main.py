@@ -167,6 +167,9 @@ deviceSound = pg.mixer.Sound("audio/sfx/device.wav")
 bumperSound = pg.mixer.Sound("audio/sfx/bumper.wav")
 nextLevel = pg.mixer.Sound("audio/sfx/nextLevel.wav")
 
+backgroundTop = anim.sprite("bg-top")
+backgroundBottom = anim.sprite("bg-bottom")
+
 devicetm = anim.split("device", 2)
 
 level = anim.sprite("level")
@@ -319,6 +322,10 @@ def mainMenu(display):
 	timeTrigger = True
 	snangle = 0
 
+	strobs = []
+	for i in range(200):
+		strobs.append((randint(0, 960), randint(0, 640), randint(0, 360)))
+
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
@@ -354,8 +361,12 @@ def mainMenu(display):
 		msx, msy = pg.mouse.get_pos()
 
 		display.fill((255, 255, 255))
+		display.blit(backgroundBottom, (0, 0))
 
 		pg.mixer.music.set_volume(not mute[0])
+
+		for i in strobs:
+			blitRotateCenter(display, blocks[-2].animator.getFirstFrame(), i[2], i[:2:], 1)
 
 		if not snakeEnable:
 			if len(snakes) < 1000:
@@ -372,6 +383,8 @@ def mainMenu(display):
 
 		for i in range(snakeProg):
 			display.blit(snektext[i], (960 - 34 * 5 + i * 32 + 2, 640 - 54))
+
+		display.blit(backgroundTop, (0, 0))
 
 		if not snakeEnable and snangle < 180:
 			snangle += 2
@@ -609,6 +622,10 @@ def mainGame(screen):
 	stroberies = 0
 	deviceAcquired = False
 	deviceRect = pg.Rect(25 * 32 + 4, 18 * 32 + 8, 24, 24)
+	beginTime = time()
+	completeTime = 0
+	deaths = 0
+	jumps = 0
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
@@ -726,6 +743,7 @@ def mainGame(screen):
 						vx = -480 * deltaTime
 					else: vx = 480 * deltaTime
 				vy = -320
+				jumps += 1
 
 			wpressed = True
 		else:
@@ -821,9 +839,9 @@ def mainGame(screen):
 			display.blit(uiFont.render(f"Level {currentRoom + 1}", True, (255, 255, 255)), (6, 6))
 			display.blit(uiFont.render(f"Strawberries: {stroberies}", True, (255, 255, 255)), (6, 26))
 		else:
-			blitCenter(display, uiFont.render("This is a strawberry.", True, (255, 255, 255)), 22 * 32 + 20 - 8, 11 * 32 + 20)
-			display.blit(uiFont.render("There's one per level.", True, (255, 255, 255)), (22 * 32 + 20 - 8, 11 * 32 + 20))
-			display.blit(uiFont.render("Try to collect them all!", True, (255, 255, 255)), (22 * 32 + 19 - 8, 11 * 32 + 40))
+			blitCenter(display, controlsFont.render("You escaped!", True, (255, 255, 255)), 960 // 2, 10 * 32)
+			blitCenter(display, controlsFont.render("Thank you for playing!", True, (255, 255, 255)), 960 // 2, 12 * 32)
+			blitCenter(display, uiFont.render(f"Time: {str(int(completeTime // 60)).rjust(2, '0')}:{str(int(completeTime % 60)).rjust(2, '0')}   Strawberries: {stroberies}   Deaths: {deaths}   Jumps: {jumps}", True, (255, 255, 255)), 960 // 2, 13 * 32 + 8)
 
 		if debug:
 			for i in colliderList[dimension]:
@@ -864,9 +882,10 @@ def mainGame(screen):
 			impulseQueue[i][0].animator.updateAnimationFrame(int(impulseQueue[i][1]))
 			impulseQueue[i][1] -= 10 * deltaTime
 
-		if (killCol[0] and killCol[1]) or tickK:
+		if (killCol[0] and killCol[1]) or tickK or px < 0 or py < 0 or py > 640:
 			if not tickK:
 				death.play()
+				deaths += 1
 				vx = 0
 				vy = 0
 				dimension = 0
@@ -934,6 +953,7 @@ def mainGame(screen):
 			else:
 				dimension = 0
 				if currentRoom == (len(roomNames) - 1):
+					completeTime = time() - beginTime
 					dimension = 2
 					deviceAcquired = False
 					pg.mixer.music.fadeout(300)
