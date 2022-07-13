@@ -147,8 +147,8 @@ coll = anim.sprite("collider")
 collkill = anim.sprite("colliderkill")
 
 death = pg.mixer.Sound("audio/sfx/death.wav")
-death.set_volume(0.5)
 select = pg.mixer.Sound("audio/sfx/select.wav")
+warpFail = pg.mixer.Sound("audio/sfx/warpFail.wav")
 
 currentLevel = 0
 
@@ -452,6 +452,9 @@ def getPlayerSprite(tick):
 def mainGame(screen):
 	global colliderList, bg, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
 
+	screenShakeTime = 0
+	screenOffSet = [0, 0]
+
 	pg.mixer.music.fadeout(300)
 	pg.mixer.music.load(choice(loops))
 	pg.mixer.music.play(loops=-1, fade_ms=300)
@@ -519,6 +522,7 @@ def mainGame(screen):
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
+		warpFail.set_volume(not mute[1] * 0.7)
 
 		for i in updaters[dimension]:
 			if i.typ == "spooke":
@@ -651,6 +655,8 @@ def mainGame(screen):
 				dimension %= 3
 				vx = previousVx
 				vy = previousVy
+				screenShakeTime = 6
+				warpFail.play()
 
 
 		display.fill((255, 255, 255))
@@ -683,13 +689,19 @@ def mainGame(screen):
 
 		pg.mixer.music.set_volume(not mute[0])
 
+		screenOffSet = [0, 0]
+		if screenShakeTime > 0:
+			if screenShakeTime % 4 in [0, 1]: screenOffSet[0] = 1.5 * screenShakeTime
+			else: screenOffSet[0] = -1.5 * screenShakeTime
+			screenShakeTime -= 1
+
 		if killCol[0] and killCol[1] or tickK:
 			if not tickK:
 				death.play()
 				vx = 0
 				vy = 0
 				dimension = 0
-				screen.blit(display, (0, 0))
+				screen.blit(display, screenOffSet)
 				for i in range(40):
 					pg.event.get()
 					cock.tick(60)
@@ -718,7 +730,7 @@ def mainGame(screen):
 					cock.tick(60)
 					surff.fill((0, 0, 0))
 					pg.draw.circle(surff, (255, 255, 255), (px, py), i * 30)
-					screen.blit(display, (0, 0))
+					screen.blit(display, screenOffSet)
 					screen.blit(surff, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
 					pg.display.update()
 					pg.time.delay(1)
@@ -748,7 +760,7 @@ def mainGame(screen):
 			px = ipx
 			py = ipy"""
 
-		if not tickK: screen.blit(display, (0, 0))
+		if not tickK: screen.blit(display, screenOffSet)
 		pg.display.update()
 
 		if paused:
@@ -777,7 +789,7 @@ def mainGame(screen):
 
 				cock.tick(60)
 
-				screen.blit(display, (0, 0))
+				screen.blit(display, screenOffSet)
 				pg.draw.rect(fil, (125, 125, 125), (0, 0, 960, 640))
 				screen.blit(fil, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
 
@@ -821,7 +833,7 @@ def mainGame(screen):
 			pg.event.get()
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((i / 200) ** 2) * 320)))
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((i / 200) ** 2) * 320), 960, int(((i / 200) ** 2) * 320)))
-			screen.blit(display, (0, 0))
+			screen.blit(display, screenOffSet)
 			pg.display.update()
 			pg.time.delay(5)
 
