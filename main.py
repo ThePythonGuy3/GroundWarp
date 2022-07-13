@@ -225,7 +225,7 @@ def loadRoom(name):
 	for r in range(3):
 		dd = tiles[r].keys()
 		for i in dd:
-			if tiles[r][i].kill or tiles[r][i].strobery:
+			if tiles[r][i].kill or tiles[r][i].strobery or tiles[r][i].impulse != 0:
 				bitm[r][i] = 15
 				continue
 
@@ -669,6 +669,7 @@ def mainGame(screen):
 					if e.key == pg.K_h:
 						dimensionTransition(screen, display, sh, dimension, px, py - 16)
 
+				#TODO remove
 				if e.key == pg.K_DOWN:
 					deviceAcquired = True
 					px = 980
