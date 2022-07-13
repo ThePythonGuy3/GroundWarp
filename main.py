@@ -839,10 +839,13 @@ def mainGame(screen):
 			display.blit(uiFont.render(f"Level {currentRoom + 1}", True, (255, 255, 255)), (6, 6))
 			display.blit(uiFont.render(f"Strawberries: {stroberies}", True, (255, 255, 255)), (6, 26))
 		else:
-			blitCenter(display, controlsFont.render("You escaped!", True, (255, 255, 255)), 960 // 2, 10 * 32)
-			blitCenter(display, controlsFont.render("Thank you for playing!", True, (255, 255, 255)), 960 // 2, 12 * 32)
-			blitCenter(display, uiFont.render(f"Time: {str(int(completeTime // 60)).rjust(2, '0')}:{str(int(completeTime % 60)).rjust(2, '0')}   Strawberries: {stroberies}   Deaths: {deaths}   Jumps: {jumps}", True, (255, 255, 255)), 960 // 2, 13 * 32 + 8)
-
+			c = (40, 40, 50) #(255, 255, 255)
+			blitCenter(display, controlsFont.render("You escaped!", True, c), 960 // 2, 8 * 32)
+			blitCenter(display, controlsFont.render("Thank you for playing!", True, c), 960 // 2, 10 * 32)
+			blitCenter(display, uiFont.render(f"Time: {str(int(completeTime // 60)).rjust(2, '0')}:{str(int(completeTime % 60)).rjust(2, '0')}   Strawberries: {stroberies}   Deaths: {deaths}   Jumps: {jumps}", True, c), 960 // 2, 11 * 32 + 8)
+			if stroberies >= len(roomNames) - 1 or debug:
+				blitCenter(display, uiFont.render("Oh you got all the strawberries... we're really happy,", True, c), 960 // 2, 12 * 32 + 8)
+				blitCenter(display, uiFont.render("but we're too tired and have too little time to reward you.", True, c), 960 // 2, 13 * 32 + 8)
 		if debug:
 			for i in colliderList[dimension]:
 				color = (120, 240, 112)
@@ -853,6 +856,8 @@ def mainGame(screen):
 				if cols[i][0]: color = (90, 240, 200)
 				pg.draw.rect(display, color, hitboxes[i], 1)
 			if dimension == 0 and currentRoom == 0: pg.draw.rect(display, (240, 60, 200), deviceRect, 1)
+
+			display.blit(uiFont.render("Hitbox mode enabled, press P to toggle.", True, (0, 0, 0)), (0, 610))
 
 		pg.mixer.music.set_volume(not mute[0])
 
