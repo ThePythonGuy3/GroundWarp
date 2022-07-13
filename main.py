@@ -925,6 +925,7 @@ def mainGame(screen):
 				py *= 32
 				ipx = px
 				ipy = py
+				generateBlocksBuffer(tiles, dimension, tick)
 
 		vx *= 0.8
 
