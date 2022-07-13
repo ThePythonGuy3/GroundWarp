@@ -733,7 +733,7 @@ def mainGame(screen):
 							inRun = False
 						if e.key == pg.K_h:
 							systime = datetime.now()
-							pg.image.save(display, "screenshots/screenshot-" + str(systime.strftime("%Y-%m-%d-%H-%M-%S")) + ".png")
+							pg.image.save(display, "screenshots/screenshot_" + str(systime.strftime("%Y-%m-%d_%H-%M-%S")) + ".png")
 
 					if e.type == pg.MOUSEBUTTONDOWN:
 						if e.button == 1: pressed = True
