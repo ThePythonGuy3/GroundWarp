@@ -160,6 +160,7 @@ death = pg.mixer.Sound("audio/sfx/death.wav")
 select = pg.mixer.Sound("audio/sfx/select.wav")
 warpFail = pg.mixer.Sound("audio/sfx/warpFail.wav")
 warp = pg.mixer.Sound("audio/sfx/warp.wav")
+strawberrySound = pg.mixer.Sound("audio/sfx/strawberry.wav")
 
 currentLevel = 0
 
@@ -550,6 +551,7 @@ def mainGame(screen):
 		select.set_volume(not mute[1] * 0.5)
 		warpFail.set_volume(not mute[1] * 0.7)
 		warp.set_volume(not mute[1] * 0.7)
+		strawberrySound.set_volume(not mute[1] * 0.7)
 
 		for i in updaters[dimension]:
 			if i.typ == "spooke":
@@ -733,6 +735,7 @@ def mainGame(screen):
 				tiles[dimension].pop((stob.rect.x // 32, stob.rect.y // 32))
 				colliderList[dimension].remove(stob)
 				generateBlocksBuffer(tiles, dimension, tick)
+				strawberrySound.play()
 
 		for i in impulseQueue.keys():
 			if impulseQueue[i][1] < 0:
