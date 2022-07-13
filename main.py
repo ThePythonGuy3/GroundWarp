@@ -591,8 +591,7 @@ def mainGame(screen):
 				dimension %= 3
 
 		deltaTime = cock.tick(60) / 1000
-		print(deltaTime)
-		if deltaTime > 0.05: deltaTime = 0
+		if deltaTime > 0.2: deltaTime = 0
 
 		topBox.x = px + 6
 		topBox.y = py - 2
