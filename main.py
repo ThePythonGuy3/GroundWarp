@@ -164,12 +164,11 @@ warp = pg.mixer.Sound("audio/sfx/warp.wav")
 strawberrySound = pg.mixer.Sound("audio/sfx/strawberry.wav")
 deviceSound = pg.mixer.Sound("audio/sfx/device.wav")
 bumperSound = pg.mixer.Sound("audio/sfx/bumper.wav")
+nextLevel = pg.mixer.Sound("audio/sfx/nextLevel.wav")
 
 devicetm = anim.split("device", 2)
 
 level = anim.sprite("level")
-
-currentLevel = 0
 
 def loadRoom(name):
 	global colliderList, updaters, tiles, bitm
@@ -476,6 +475,55 @@ def getPlayerSprite(tick):
 
 	return playerSprites[playerState + playerDirection * 4].animate()
 
+def dimensionTransition(screen, current, shadows, dimension, px, py):
+	global tiles, bitm
+
+	shadSuf = pg.Surface((960, 640))
+	for q in range(255):
+		pg.event.get()
+		screen.blit(current, (0, 0))
+		shadSuf.fill(tuple([255 - q for j in range(3)]))
+		screen.blit(shadSuf, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+		pg.display.update()
+
+	surfacent = pg.Surface((960, 640), pg.SRCALPHA, 32)
+	for i in range(3):
+		if i == dimension: continue
+		pg.event.get()
+		surfacent.fill((255, 255, 255, 0))
+		for k in tiles[i].keys():
+			surfacent.blit(tiles[i][k].animator.getFirstFrame(), (k[0] * 32, k[1] * 32))
+			surfacent.blit(bitmask[bitm[i][k]], (k[0] * 32, k[1] * 32), special_flags=pg.BLEND_RGBA_MULT)
+		surfacent.blit(shadows[i], (0, 0))
+
+		for q in range(255):
+			pg.event.get()
+			screen.blit(backgrounds[i], (0, 0))
+			screen.blit(surfacent, (0, 0))
+			shadSuf.fill(tuple([q for j in range(3)]))
+			screen.blit(playerSprites[0].getFirstFrame(), (px, py))
+			screen.blit(shadSuf, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+			pg.display.update()
+
+		for q in range(255):
+			pg.event.get()
+			screen.blit(backgrounds[i], (0, 0))
+			screen.blit(surfacent, (0, 0))
+			shadSuf.fill(tuple([255 - q for j in range(3)]))
+			screen.blit(playerSprites[0].getFirstFrame(), (px, py))
+			screen.blit(shadSuf, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+			pg.display.update()
+
+	for q in range(255):
+		pg.event.get()
+		screen.blit(current, (0, 0))
+		shadSuf.fill(tuple([q for j in range(3)]))
+		screen.blit(shadSuf, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
+		pg.display.update()
+
+
+	cock.tick(60)
+
 def mainGame(screen):
 	global colliderList, bg, tiles, bitm, blocksBuffer, playerState, playerStates, playerDirection, playerDirections
 
@@ -483,7 +531,7 @@ def mainGame(screen):
 	screenOffSet = [0, 0]
 
 	pg.mixer.music.fadeout(300)
-	pg.mixer.music.load(choice(loops))
+	pg.mixer.music.load(loops[0])
 	pg.mixer.music.play(loops=-1, fade_ms=300)
 
 	debug = False
@@ -563,6 +611,7 @@ def mainGame(screen):
 		strawberrySound.set_volume(not mute[1] * 0.7)
 		deviceSound.set_volume(not mute[1] * 0.7)
 		bumperSound.set_volume(not mute[1] * 0.5)
+		nextLevel.set_volume(not mute[1] * 0.5)
 
 		for i in updaters[dimension]:
 			if i.typ == "spooke":
@@ -591,12 +640,14 @@ def mainGame(screen):
 					if e.key == pg.K_LEFT:
 						dimension -= 1
 						warped = -1
+					if e.key == pg.K_h:
+						dimensionTransition(screen, display, sh, dimension, px, py - 16)
 
 				if e.key == pg.K_DOWN:
 					deviceAcquired = True
 					px = 980
 
-				if e.key == pg.K_h:
+				if e.key == pg.K_c:
 					systime = datetime.now()
 					pg.image.save(display, "screenshots/screenshot-" + str(systime.strftime("%Y-%m-%d-%H-%M-%S")) + ".png")
 
@@ -694,7 +745,7 @@ def mainGame(screen):
 		if bottomestCol[0]: vy = -64
 
 		if warped != 0:
-			if killCol[0]:
+			if killCol[0] and killCol[5] == None:
 				dimension -= warped
 				dimension %= 3
 				vx = previousVx
@@ -843,6 +894,15 @@ def mainGame(screen):
 		py += vy * deltaTime
 
 		if px >= 940:
+			currentRoom += 1
+			if currentRoom != len(roomNames): nextLevel.play()
+
+			if currentRoom >= len(roomNames) // 2:
+				pg.mixer.music.fadeout(300)
+				pg.mixer.music.unload()
+				pg.mixer.music.load(loops[1])
+				pg.mixer.music.play(loops=-1, fade_ms=300)
+
 			for i in range(38, -1, -1):
 				pg.event.get()
 				cock.tick(60)
@@ -853,7 +913,6 @@ def mainGame(screen):
 				pg.display.update()
 				pg.time.delay(3)
 
-			currentRoom += 1
 			impulseQueue = {}
 			if currentRoom == len(roomNames):
 				running = False
@@ -949,7 +1008,9 @@ def mainGame(screen):
 
 				screen.blit(controlsFont.render("ESC = Pause/Unpause", True, (255, 255, 255)), (16, 16))
 				screen.blit(controlsFont.render("W, A, D = Movement", True, (255, 255, 255)), (16, 48))
-				if deviceAcquired: screen.blit(controlsFont.render("Left, Right = Dimension Warp", True, (255, 255, 255)), (16, 80))
+				if deviceAcquired:
+					screen.blit(controlsFont.render("Left, Right = Dimension Warp", True, (255, 255, 255)), (16, 80))
+					screen.blit(controlsFont.render("H = Dimension Preview", True, (255, 255, 255)), (16, 112))
 
 				pg.display.update()
 
