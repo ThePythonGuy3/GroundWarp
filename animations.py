@@ -62,6 +62,6 @@ def blurSurf(surface, amt):
     scale = 1.0/float(amt)
     surf_size = surface.get_size()
     scale_size = (int(surf_size[0]*scale), int(surf_size[1]*scale))
-    surf = pygame.transform.smoothscale(surface, scale_size)
-    surf = pygame.transform.smoothscale(surf, surf_size)
+    surf = pg.transform.smoothscale(surface, scale_size)
+    surf = pg.transform.smoothscale(surf, surf_size)
     return surf

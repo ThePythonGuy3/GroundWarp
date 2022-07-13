@@ -1026,7 +1026,7 @@ def mainGame(screen):
 
 				cock.tick(60)
 
-				screen.blit(display, screenOffSet)
+				screen.blit(anim.blurSurf(display, 20), screenOffSet)
 				pg.draw.rect(fil, (125, 125, 125), (0, 0, 960, 640))
 				screen.blit(fil, (0, 0), special_flags=pg.BLEND_RGBA_MULT)
 
@@ -1057,10 +1057,11 @@ def mainGame(screen):
 
 				screen.blit(controlsFont.render("ESC = Pause/Unpause", True, (255, 255, 255)), (16, 16))
 				screen.blit(controlsFont.render("W, A, D = Movement", True, (255, 255, 255)), (16, 48))
+				screen.blit(controlsFont.render("C = Screenshot", True, (255, 255, 255)), (16, 80))
 				if deviceAcquired:
-					screen.blit(controlsFont.render("Left, Right = Dimension Warp", True, (255, 255, 255)), (16, 80))
-					screen.blit(controlsFont.render("H = Dimension Preview", True, (255, 255, 255)), (16, 112))
-
+					screen.blit(controlsFont.render("Left, Right = Dimension Warp", True, (255, 255, 255)), (16, 112))
+					screen.blit(controlsFont.render("H = Dimension Preview", True, (255, 255, 255)), (16, 144))
+					
 				pg.display.update()
 
 			pg.mixer.music.set_volume(not mute[0])
