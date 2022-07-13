@@ -10,7 +10,7 @@ import animations as anim
 import collisions as col
 
 if getattr(sys, 'frozen', False):
-    os.chdir(sys._MEIPASS)
+	os.chdir(sys._MEIPASS)
 
 anim.pg = pg
 col.pg = pg
