@@ -592,6 +592,10 @@ def mainGame(screen):
 						dimension -= 1
 						warped = -1
 
+				if e.key == pg.K_DOWN:
+					deviceAcquired = True
+					px = 980
+
 				if e.key == pg.K_h:
 					systime = datetime.now()
 					pg.image.save(display, "screenshots/screenshot-" + str(systime.strftime("%Y-%m-%d-%H-%M-%S")) + ".png")
