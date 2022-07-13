@@ -656,7 +656,7 @@ def mainGame(screen):
 				if e.key == pg.K_ESCAPE:
 					paused = True
 
-				if e.key = pg.K_r:
+				if e.key == pg.K_r:
 					reset = True
 
 				if deviceAcquired:
