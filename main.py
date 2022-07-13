@@ -841,11 +841,12 @@ def mainGame(screen):
 		else:
 			c = (40, 40, 50) #(255, 255, 255)
 			blitCenter(display, controlsFont.render("You escaped!", True, c), 960 // 2, 8 * 32)
-			blitCenter(display, controlsFont.render("Thank you for playing!", True, c), 960 // 2, 10 * 32)
+			blitCenter(display, controlsFont.render("Thank you for playing! <3", True, c), 960 // 2, 10 * 32)
 			blitCenter(display, uiFont.render(f"Time: {str(int(completeTime // 60)).rjust(2, '0')}:{str(int(completeTime % 60)).rjust(2, '0')}   Strawberries: {stroberies}   Deaths: {deaths}   Jumps: {jumps}", True, c), 960 // 2, 11 * 32 + 8)
 			if stroberies >= len(roomNames) - 1 or debug:
 				blitCenter(display, uiFont.render("Oh you got all the strawberries... we're really happy,", True, c), 960 // 2, 12 * 32 + 8)
 				blitCenter(display, uiFont.render("but we're too tired and have too little time to reward you.", True, c), 960 // 2, 13 * 32 + 8)
+
 		if debug:
 			for i in colliderList[dimension]:
 				color = (120, 240, 112)
