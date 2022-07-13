@@ -452,7 +452,6 @@ def mainGame(screen):
 
 	mainSurf = pg.Surface((960, 640), pg.SRCALPHA, 32)
 	shad = anim.sprite("shadow")
-	glow = anim.sprite("glow")
 
 	topBox = pg.Rect(0, 0, 20, 6)
 	toppestBox = pg.Rect(0, 0, 20, 6)
@@ -492,7 +491,8 @@ def mainGame(screen):
 	fil = pg.Surface((960, 640))
 	paused = False
 
-	tickK = False
+	tickK = True
+	ftk = True
 	tExit = False
 	while running:
 		death.set_volume(not mute[1] * 0.5)
@@ -678,7 +678,13 @@ def mainGame(screen):
 			tickK = not tickK
 
 			if not tickK:
-				#screen.blit(display, (0, 0))
+				if ftk:
+					ftk = False
+					vx = 0
+					vy = 0
+					px = ipx
+					pt = ipy
+
 				surff = pg.Surface((960, 640))
 				for i in range(39):
 					pg.event.get()
@@ -708,12 +714,12 @@ def mainGame(screen):
 		frame += 1
 		tick += 1
 
-		if st >= 0:
+		"""if st >= 0:
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 0, 960, int(((st / 200) ** 2) * 320)))
 			pg.draw.rect(display, (0, 0, 0), pg.Rect(0, 640 -int(((st / 200) ** 2) * 320), 960, int(((st / 200) ** 2) * 320)))
 			st -= 5
 			px = ipx
-			py = ipy
+			py = ipy"""
 
 		if not tickK: screen.blit(display, (0, 0))
 		pg.display.update()
