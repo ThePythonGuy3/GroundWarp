@@ -162,6 +162,8 @@ warpFail = pg.mixer.Sound("audio/sfx/warpFail.wav")
 warp = pg.mixer.Sound("audio/sfx/warp.wav")
 strawberrySound = pg.mixer.Sound("audio/sfx/strawberry.wav")
 
+devicetm = anim.split("device", 2)
+
 currentLevel = 0
 
 def loadRoom(name):
@@ -547,6 +549,7 @@ def mainGame(screen):
 	ended = False
 	stroberies = 0
 	deviceAcquired = False
+	deviceRect = pg.Rect(25 * 32 + 4, 18 * 32 + 8, 24, 24)
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
@@ -557,7 +560,6 @@ def mainGame(screen):
 		for i in updaters[dimension]:
 			if i.typ == "spooke":
 				i.run([colliderList, defaultColliderLen])
-
 
 		previousVx = vx
 		previousVy = vy
@@ -610,6 +612,9 @@ def mainGame(screen):
 		rightestBox.y = py + 4
 		killBox.x = px + 10
 		killBox.y = py + 10
+
+		if not deviceAcquired and dimension == 0 and currentRoom == 0 and killBox.colliderect(deviceRect):
+			deviceAcquired = True
 
 		rightCol = col.rectCollide(colliderList[dimension], rightBox, True)
 		rightestCol = col.rectCollide(colliderList[dimension], rightestBox, True)
@@ -715,6 +720,9 @@ def mainGame(screen):
 
 		mainSurf.blit(shad, (px, py + 8), special_flags=pg.BLEND_RGBA_MULT)
 
+		if dimension == 0 and currentRoom == 0:
+			display.blit(devicetm[deviceAcquired], (25 * 32, 18 * 32))
+
 		display.blit(mainSurf, (0, 0))
 		display.blit(getPlayerSprite(tick), (px, py - 16))
 		if not debug: display.blit(sh[dimension], (0, 0))
@@ -728,6 +736,7 @@ def mainGame(screen):
 				color = (240, 60, 200)
 				if cols[i][0]: color = (90, 240, 200)
 				pg.draw.rect(display, color, hitboxes[i], 1)
+			if dimension == 0 and currentRoom == 0: pg.draw.rect(display, (240, 60, 200), deviceRect, 1)
 
 		pg.mixer.music.set_volume(not mute[0])
 
