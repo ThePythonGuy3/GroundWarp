@@ -63,7 +63,6 @@ class block:
 						data[0][dimension].append(col.collider(blocc, tilex * 2 + 1, tiley * 2, True))
 				elif self.animator.currentAnimationFrame == 7:
 					while len(data[0][dimension]) > data[1][dimension]:
-						print(len(data[0][dimension]), data[1][dimension])
 						data[0][dimension].pop()
 
 			updaters[dimension].append(updater(runner, "spooke"))
@@ -644,6 +643,7 @@ def mainGame(screen):
 		previousVy = vy
 
 		warped = 0
+		reset = True
 		for e in pg.event.get():
 			if e.type == pg.QUIT:
 				running = False
@@ -655,6 +655,9 @@ def mainGame(screen):
 
 				if e.key == pg.K_ESCAPE:
 					paused = True
+
+				if e.key = pg.K_r:
+					reset = True
 
 				if deviceAcquired:
 					if e.key == pg.K_RIGHT:
@@ -888,7 +891,7 @@ def mainGame(screen):
 			impulseQueue[i][0].animator.updateAnimationFrame(int(impulseQueue[i][1]))
 			impulseQueue[i][1] -= 10 * deltaTime
 
-		if (killCol[0] and killCol[1]) or tickK or px < 0 or py < 0 or py > 640:
+		if (killCol[0] and killCol[1]) or tickK or px < 0 or py < 0 or py > 640 or reset:
 			if not tickK:
 				death.play()
 				deaths += 1
