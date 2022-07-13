@@ -2,6 +2,7 @@ import pygame as pg
 from math import *
 from time import *
 from random import *
+from datetime import datetime
 import os
 import webbrowser
 
@@ -519,6 +520,10 @@ def mainGame(screen):
 				if e.key == pg.K_LEFT:
 					dimension -= 1
 					warped = -1
+
+				if e.key == pg.K_h:
+					systime = datetime.now()
+					pg.image.save(display, "screenshots/screenshot-" + str(systime.strftime("%Y-%m-%d-%H-%M-%S")) + ".png")
 
 				dimension %= 3
 
