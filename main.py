@@ -840,7 +840,7 @@ def mainGame(screen):
 			display.blit(uiFont.render(f"Strawberries: {stroberies}", True, (255, 255, 255)), (6, 26))
 		else:
 			blitCenter(display, controlsFont.render("You escaped!", True, (255, 255, 255)), 960 // 2, 10 * 32)
-			blitCenter(display, controlsFont.render("Thank you for playing!", True, (255, 255, 255)), 960 // 2, 12 * 32)
+			blitCenter(display, controlsFont.render("Thank you for playing! <3", True, (255, 255, 255)), 960 // 2, 12 * 32)
 			blitCenter(display, uiFont.render(f"Time: {str(int(completeTime // 60)).rjust(2, '0')}:{str(int(completeTime % 60)).rjust(2, '0')}   Strawberries: {stroberies}   Deaths: {deaths}   Jumps: {jumps}", True, (255, 255, 255)), 960 // 2, 13 * 32 + 8)
 
 		if debug:
