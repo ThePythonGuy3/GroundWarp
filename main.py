@@ -23,11 +23,17 @@ display = pg.display.set_mode((960, 640))
 pg.display.set_caption("GroundWarp")
 pg.display.set_icon(anim.sprite("icon"))
 
+class updater:
+	def __init__(self, run, typ):
+		self.run = run
+		self.typ = typ
+
 class block:
-	def __init__(self, animator, kill = False, half = False):
+	def __init__(self, animator, kill = False, half = False, spikeGrow = False):
 		self.animator = animator
 		self.kill = kill
 		self.half = half
+		self.spikeGrow = spikeGrow
 
 	def create(self, colliderList, dimension, tilex, tiley, rotation): # Rotation goes in 0-3 format, 0 being upwards and going clockwise
 		if self.half:
@@ -38,6 +44,18 @@ class block:
 				if rotation == 3: colliderList[dimension].append(col.collider(tilex * 2 + 1, tiley * 2 + i, self.kill))
 		else:
 			colliderList[dimension].append(col.collider(tilex * 2, tiley * 2, self.kill, 32))
+
+		if self.spikeGrow:
+			def runner(data):
+				if self.animator.currentAnimationFrame == 2:
+					if len(data[0][dimension]):
+						data[0][dimension].append(col.collider(tilex * 2, tiley * 2, True))
+						data[0][dimension].append(col.collider(tilex * 2 + 1, tiley * 2, True))
+				elif self.animator.currentAnimationFrame == 7:
+					while len(data[0][dimension]) > data[1][dimension]:
+						data[0][dimension].pop()
+
+			updaters[dimension].append(updater(runner, "spooke"))
 
 		return self
 
@@ -52,7 +70,7 @@ blocks = [
 	block(anim.animator(anim.sprite("blockB1"))),
 	block(anim.animator(anim.split("blockB2", 9), 2, True)),
 	block(anim.animator(anim.split("spoikeB", 6), 2), True, True),
-	block(anim.animator(anim.split("spoikeB", 6), 2), True, True),
+	block(anim.animator(anim.split("spoikeB2", 12), 2), False, True, True),
 	block(anim.animator(anim.sprite("blockC"))),
 	block(anim.animator(anim.sprite("blockC1"))),
 	block(anim.animator(anim.sprite("blockC2"))),
@@ -92,6 +110,7 @@ bitmask = anim.split("bitmask", 16)
 colliderList = [[], [], []] # Dimensions A, B, C
 tiles = [{}, {}, {}]
 bitm = [{}, {}, {}]
+updaters = [[], [], []]
 
 mute = [
 	False, #mute sound
@@ -134,9 +153,10 @@ select = pg.mixer.Sound("audio/sfx/select.wav")
 currentLevel = 0
 
 def loadRoom(name):
-	global colliderList, tiles, bitm
+	global colliderList, updaters, tiles, bitm
 
 	colliderList = [[], [], []]
+	updaters = [[], [], []]
 	tiles = [{}, {}, {}]
 	bitm = [{}, {}, {}]
 
@@ -448,6 +468,8 @@ def mainGame(screen):
 	ipx = px
 	ipy = py
 
+	defaultColliderLen = [len(colliderList[i]) for i in range(3)] # Used for animated spikes
+
 	enableShadow = False
 
 	mainSurf = pg.Surface((960, 640), pg.SRCALPHA, 32)
@@ -497,6 +519,11 @@ def mainGame(screen):
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
+
+		for i in updaters[dimension]:
+			if i.typ == "spooke":
+				i.run([colliderList, defaultColliderLen])
+
 
 		previousVx = vx
 		previousVy = vy
