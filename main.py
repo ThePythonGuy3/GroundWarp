@@ -29,12 +29,13 @@ class updater:
 		self.typ = typ
 
 class block:
-	def __init__(self, animator, kill = False, half = False, spikeGrow = False, impulse = 0):
+	def __init__(self, animator, kill = False, half = False, spikeGrow = False, impulse = 0, strobery = False):
 		self.animator = animator
 		self.kill = kill
 		self.half = half
 		self.spikeGrow = spikeGrow
 		self.impulse = impulse
+		self.strobery = strobery
 
 	def copy(self):
 		return block(self.animator.copy(), self.kill, self.half, self.spikeGrow, self.impulse)
@@ -84,7 +85,8 @@ blocks = [
 	block(anim.animator(anim.sprite("blockC1"))),
 	block(anim.animator(anim.sprite("blockC2"))),
 	block(anim.animator(anim.sprite("spoikeC")), True, True),
-	block(anim.animator(anim.sprite("blockC3")), True, True)
+	block(anim.animator(anim.split("strobery", 8), 2), strobery = True),
+	block(anim.animator(anim.sprite("blockC3")))
 ]
 
 playerSprites = [
@@ -188,6 +190,7 @@ def loadRoom(name):
 	for r in range(3):
 		x = 0
 		y = 0
+		ni = 0
 		for i in n[r]:
 			if i == ";":
 				x = -1
@@ -198,13 +201,20 @@ def loadRoom(name):
 					if v == 9:
 						rx = x
 						ry = y
-					else: tiles[r][(x, y)] = blocks[v - 1 + r * 5].create(colliderList, r, x, y, 0)
+					else:
+						blocksel = blocks[v - 1 + r * 5]
+						if v == 3 and r == 2:
+							if ni - 31 > 0 and ni - 31 < len(n[r]):
+								vv = int(n[r][ni - 31])
+								if vv == 0 or (vv > 3 and vv != 5): blocksel = blocks[-1]
+						tiles[r][(x, y)] = blocksel.create(colliderList, r, x, y, 0)
+			ni += 1
 			x += 1
 
 	for r in range(3):
 		dd = tiles[r].keys()
 		for i in dd:
-			if tiles[r][i].kill:
+			if tiles[r][i].kill or tiles[r][i].strobery:
 				bitm[r][i] = 15
 				continue
 
@@ -533,6 +543,7 @@ def mainGame(screen):
 	ftk = True
 	tExit = False
 	ended = False
+	stroberies = 0
 	while running:
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
@@ -578,6 +589,8 @@ def mainGame(screen):
 				dimension %= 3
 
 		deltaTime = cock.tick(60) / 1000
+		print(deltaTime)
+		if deltaTime > 0.05: deltaTime = 0
 
 		topBox.x = px + 6
 		topBox.y = py - 2
@@ -708,9 +721,16 @@ def mainGame(screen):
 			else: screenOffSet[0] = -1.5 * screenShakeTime
 			screenShakeTime -= 1
 
-		if killCol[0] and killCol[2] != 0:
-			vy = killCol[2]
-			impulseQueue[killCol[4]] = [killCol[3], 4]
+		if killCol[0]:
+			if killCol[2] != 0:
+				vy = killCol[2]
+				impulseQueue[killCol[4]] = [killCol[3], 4]
+			if killCol[5] != None:
+				stroberies += 1
+				stob = killCol[5]
+				tiles[dimension].pop((stob.rect.x // 32, stob.rect.y // 32))
+				colliderList[dimension].remove(stob)
+				generateBlocksBuffer(tiles, dimension, tick)
 
 		for i in impulseQueue.keys():
 			if impulseQueue[i][1] < 0:

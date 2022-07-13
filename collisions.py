@@ -13,14 +13,17 @@ def rectCollide(colliderList, rect, ignore = False):
 	impulse = 0
 	impulseCol = None
 	impulseId = 0
+	stroboro = None
 	for i in colliderList:
 		if rect.colliderect(i.rect):
-			if ignore and (i.kill or i.impulse != 0): continue
+			if ignore and (i.kill or i.impulse != 0 or i.block.strobery): continue
 			collide = True
 			if i.kill: kill = True
 			if i.impulse != 0:
 				impulse = i.impulse
 				impulseCol = i.block
 				impulseId = id(i)
-	return [collide, kill, impulse, impulseCol, impulseId]
+			if i.block.strobery:
+				stroboro = i
+	return [collide, kill, impulse, impulseCol, impulseId, stroboro]
 
