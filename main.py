@@ -157,6 +157,7 @@ snekfx = [pg.mixer.Sound("audio/sfx/snek" + str(i + 1) + ".mp3") for i in range(
 death = pg.mixer.Sound("audio/sfx/death.wav")
 select = pg.mixer.Sound("audio/sfx/select.wav")
 warpFail = pg.mixer.Sound("audio/sfx/warpFail.wav")
+warp = pg.mixer.Sound("audio/sfx/warp.wav")
 
 currentLevel = 0
 
@@ -537,6 +538,7 @@ def mainGame(screen):
 		death.set_volume(not mute[1] * 0.5)
 		select.set_volume(not mute[1] * 0.5)
 		warpFail.set_volume(not mute[1] * 0.7)
+		warp.set_volume(not mute[1] * 0.7)
 
 		for i in updaters[dimension]:
 			if i.typ == "spooke":
@@ -671,6 +673,7 @@ def mainGame(screen):
 				vy = previousVy
 				screenShakeTime = 6
 				warpFail.play()
+			else: warp.play()
 
 
 		display.fill((255, 255, 255))
