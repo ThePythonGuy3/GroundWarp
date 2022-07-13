@@ -120,7 +120,7 @@ mute = [
 pg.font.init()
 controlsFont = pg.font.SysFont("twcen", 24)
 
-backgrounds = [anim.sprite("factorybg"), anim.sprite("factorybg"), anim.sprite("forestbg")]
+backgrounds = [anim.sprite("factorybg"), anim.sprite("organicbg"), anim.sprite("forestbg")]
 crtag = anim.sprite("creditsTag")
 
 muteButtons = anim.splitCustom("mute-buttons", 3, 24, 24)
