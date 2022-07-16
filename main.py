@@ -1,3 +1,5 @@
+#Oriol: Nivel 4, 1 Fresa
+
 import pygame as pg
 from math import *
 from time import *
