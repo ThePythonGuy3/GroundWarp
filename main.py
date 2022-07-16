@@ -831,7 +831,7 @@ def mainGame(screen):
 				display.blit(uiFont.render("Use Left and Right to warp dimensions.", True, (255, 255, 255)), (17 * 32 + 20, 12 * 32 + 24))
 				display.blit(uiFont.render("Press H to preview all three dimensions.", True, (255, 255, 255)), (17 * 32 + 18, 12 * 32 + 48))
 			else:
-				display.blit(uiFont.render("Grab this.", True, (255, 255, 255)), (24 * 32 + 8, 17 * 32))
+				display.blit(uiFont.render("Grab this.", True, (255, 255, 255)), (24 * 32 + 12, 17 * 32))
 
 		if dimension == 2 and currentRoom == 0 and stroberies == 0:
 			display.blit(uiFont.render("This is a strawberry.", True, (255, 255, 255)), (22 * 32 + 24 - 8, 11 * 32))
