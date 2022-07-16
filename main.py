@@ -670,9 +670,9 @@ def mainGame(screen):
 						dimensionTransition(screen, display, sh, dimension, px, py - 16)
 
 				#TODO remove
-				if e.key == pg.K_DOWN:
+				"""if e.key == pg.K_DOWN:
 					deviceAcquired = True
-					px = 980
+					px = 980"""
 
 				if e.key == pg.K_c:
 					systime = datetime.now()
