@@ -1,5 +1,3 @@
-#Oriol: Nivel 4, 1 Fresa
-
 import pygame as pg
 from math import *
 from time import *
@@ -132,8 +130,8 @@ mute = [
 ]
 
 pg.font.init()
-controlsFont = pg.font.SysFont("twcen", 24)
-uiFont = pg.font.SysFont("twcen", 20)
+controlsFont = pg.font.Font("fonts/AlbertSans.ttf", 20)
+uiFont = pg.font.Font("fonts/AlbertSans.ttf", 16)
 
 backgrounds = [anim.sprite("factorybg"), anim.sprite("organicbg"), anim.sprite("forestbg")]
 crtag = anim.sprite("creditsTag")
@@ -672,9 +670,9 @@ def mainGame(screen):
 						dimensionTransition(screen, display, sh, dimension, px, py - 16)
 
 				#TODO remove
-				"""if e.key == pg.K_DOWN:
+				if e.key == pg.K_DOWN:
 					deviceAcquired = True
-					px = 980"""
+					px = 980
 
 				if e.key == pg.K_c:
 					systime = datetime.now()
